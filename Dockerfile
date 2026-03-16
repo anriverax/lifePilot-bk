@@ -31,9 +31,10 @@ COPY --from=builder /lifePilot/dist ./dist
 
 COPY package*.json ./
 
-# Copiar entrypoint desde repo
+# Copiar entrypoint y wait-for-it desde repo
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/wait-for-it.sh
 
 RUN chown -R node:node /lifePilot
 # Usamos usuario no-root

@@ -1,9 +1,9 @@
-import { Injectable, OnModuleDestroy, Logger } from "@nestjs/common";
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Redis from "ioredis";
 
 @Injectable()
-export class RedisService implements OnModuleDestroy {
+export class RedisService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
   readonly client: Redis;
 
@@ -12,7 +12,7 @@ export class RedisService implements OnModuleDestroy {
       host: this.configService.get<string>("REDIS_HOST", "localhost"),
       port: this.configService.get<number>("REDIS_PORT", 6379),
       password: this.configService.get<string>("REDIS_PASSWORD") || undefined,
-      lazyConnect: true
+      lazyConnect: true,
     });
 
     this.client.on("connect", () => {
@@ -25,7 +25,11 @@ export class RedisService implements OnModuleDestroy {
     });
   }
 
-  async onModuleDestroy() {
+  async onModuleInit(): Promise<void> {
+    await this.client.connect();
+  }
+
+  async onModuleDestroy(): Promise<void> {
     await this.client.quit();
     this.logger.log("Redis client disconnected");
   }
@@ -49,6 +53,7 @@ export class RedisService implements OnModuleDestroy {
     return result === 1;
   }
 
+  // ========== JSON Operations ==========
   async setJson(key: string, value: unknown, ttl?: number): Promise<void> {
     await this.set(key, JSON.stringify(value), ttl);
   }
@@ -65,3 +70,4 @@ export class RedisService implements OnModuleDestroy {
     }
   }
 }
+
