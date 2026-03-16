@@ -8,11 +8,13 @@ const mockRedisClient = {
   set: jest.fn(),
   del: jest.fn(),
   exists: jest.fn(),
+  connect: jest.fn().mockResolvedValue(undefined),
   quit: jest.fn().mockResolvedValue('OK'),
 };
 
 jest.mock('ioredis', () => {
   const mock = jest.fn().mockImplementation(() => mockRedisClient);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (mock as any).default = mock;
   return mock;
 });
@@ -27,8 +29,8 @@ describe('RedisService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string, defaultValue?: any) => {
-              const config: Record<string, any> = {
+            get: jest.fn((key: string, defaultValue?: unknown) => {
+              const config: Record<string, unknown> = {
                 REDIS_HOST: 'localhost',
                 REDIS_PORT: 6379,
                 REDIS_PASSWORD: '',
@@ -125,6 +127,13 @@ describe('RedisService', () => {
       mockRedisClient.get.mockResolvedValue('not-valid-json{');
       const result = await service.getJson('bad-json-key');
       expect(result).toBeNull();
+    });
+  });
+
+  describe('onModuleInit', () => {
+    it('should connect the redis client', async () => {
+      await service.onModuleInit();
+      expect(mockRedisClient.connect).toHaveBeenCalled();
     });
   });
 

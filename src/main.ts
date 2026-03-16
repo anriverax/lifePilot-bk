@@ -1,11 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
+  // HTTP security headers
+  app.use(helmet());
+
+  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -14,17 +19,21 @@ async function bootstrap() {
     }),
   );
 
-  // Configurar CORS con restricciones
+  // CORS configuration
+  const rawOrigins = process.env.CORS_ORIGINS ?? 'http://localhost:3000';
+  const origins = rawOrigins.split(',').map((o) => o.trim());
   app.enableCors({
-    origin: process.env.CORS_ORIGINS?.split(',') || 'http://localhost:3000',
+    origin: origins.length === 1 ? origins[0] : origins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
+  // Graceful shutdown support
+  app.enableShutdownHooks();
+
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-
   logger.log(`Application is running on: http://localhost:${port}`);
 }
 
