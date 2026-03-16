@@ -1,6 +1,6 @@
-import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import { Injectable, OnModuleDestroy, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import Redis from "ioredis";
 
 @Injectable()
 export class RedisService implements OnModuleDestroy {
@@ -9,24 +9,25 @@ export class RedisService implements OnModuleDestroy {
 
   constructor(private readonly configService: ConfigService) {
     this.client = new Redis({
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-      password: this.configService.get<string>('REDIS_PASSWORD') || undefined,
-      lazyConnect: true,
+      host: this.configService.get<string>("REDIS_HOST", "localhost"),
+      port: this.configService.get<number>("REDIS_PORT", 6379),
+      password: this.configService.get<string>("REDIS_PASSWORD") || undefined,
+      lazyConnect: true
     });
 
-    this.client.on('connect', () => {
-      this.logger.log('Redis client connected');
+    this.client.on("connect", () => {
+      this.logger.log("Redis client connected");
     });
 
-    this.client.on('error', (err) => {
-      this.logger.error(`Redis client error: ${err.message}`);
+    this.client.on("error", (err) => {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Redis client error: ${message}`);
     });
   }
 
   async onModuleDestroy() {
     await this.client.quit();
-    this.logger.log('Redis client disconnected');
+    this.logger.log("Redis client disconnected");
   }
 
   async get(key: string): Promise<string | null> {
@@ -34,9 +35,9 @@ export class RedisService implements OnModuleDestroy {
   }
 
   async set(key: string, value: string, ttl?: number): Promise<void> {
-    const defaultTtl = this.configService.get<number>('REDIS_TTL', 3600);
+    const defaultTtl = this.configService.get<number>("REDIS_TTL", 3600);
     const expiry = ttl ?? defaultTtl;
-    await this.client.set(key, value, 'EX', expiry);
+    await this.client.set(key, value, "EX", expiry);
   }
 
   async del(key: string): Promise<void> {
@@ -58,9 +59,8 @@ export class RedisService implements OnModuleDestroy {
     try {
       return JSON.parse(raw) as T;
     } catch (err) {
-      this.logger.error(
-        `Failed to parse JSON for key "${key}": ${err.message}`,
-      );
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Failed to parse JSON for key "${key}": ${message}`);
       return null;
     }
   }

@@ -14,7 +14,13 @@ async function bootstrap() {
     }),
   );
 
-  app.enableCors();
+  // Configurar CORS con restricciones
+  app.enableCors({
+    origin: process.env.CORS_ORIGINS?.split(',') || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);

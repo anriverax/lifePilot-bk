@@ -1,0 +1,23 @@
+# Dependencias locales
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Builds y dist
+dist/
+build/
+
+# Configuración y secretos
+.env
+.env.*
+*.pem
+*.key
+
+# Git y otros
+.git/
+.gitignore
+.DS_Store
+
+# Logs y temporales
+*.log
+tmp/
