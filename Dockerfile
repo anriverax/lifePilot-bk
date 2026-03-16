@@ -5,14 +5,10 @@ WORKDIR /lifePilot
 
 # Copiamos solo los archivos necesarios para instalar dependencias
 COPY package*.json ./
-
-# Instalamos dependencias
 RUN npm install
 
 # Copiamos el código fuente
 COPY . .
-
-# Compilamos la aplicación
 RUN npm run build
 
 # -------------------------------------
@@ -25,6 +21,7 @@ WORKDIR /lifePilot
 # Variables de entorno
 ENV NODE_ENV=production
 ENV PORT=3000
+
 COPY --from=builder /lifePilot/prisma ./prisma
 COPY --from=builder /lifePilot/node_modules ./node_modules
 COPY --from=builder /lifePilot/dist ./dist
