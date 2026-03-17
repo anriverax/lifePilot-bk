@@ -1,9 +1,9 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { Prisma, PrismaClient } from "prisma/generated/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
-import { firstCapitalLetter } from '@/common/helpers/functions';
+import { firstCapitalLetter } from "@/common/helpers/functions";
 
 const modelsWithSoftDelete: string[] = [];
 
@@ -32,17 +32,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     this.pool = pool;
 
     const extended = this.$extends({
-      result: {
-        person: {
-          fullName: {
-            needs: { firstName: true, lastName1: true, lastName2: true },
-            compute(person) {
-              const name = `${person.firstName} ${person.lastName1}`;
-              return person.lastName2 !== null ? `${name} ${person.lastName2}` : name;
-            }
-          }
-        }
-      },
       query: {
         $allModels: {
           $allOperations({ model, operation, args, query }) {
