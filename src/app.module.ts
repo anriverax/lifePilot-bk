@@ -9,12 +9,14 @@ import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./services/prisma/prisma.module";
 import { RedisModule } from "./services/redis/redis.module";
 import config from './config';
+import { envValidationSchema } from './config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [config]
+      load: [config],
+      validationSchema: envValidationSchema
     }),
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],

@@ -9,6 +9,10 @@ RUN npm install
 
 # Copiamos el código fuente
 COPY . .
+
+# Generamos el cliente de Prisma antes de compilar
+RUN npx prisma generate
+
 RUN npm run build
 
 # -------------------------------------
@@ -27,6 +31,7 @@ COPY --from=builder /lifePilot/node_modules ./node_modules
 COPY --from=builder /lifePilot/dist ./dist
 
 COPY package*.json ./
+COPY prisma.config.ts ./
 
 # Copiar entrypoint y wait-for-it desde repo
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

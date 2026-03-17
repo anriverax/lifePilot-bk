@@ -9,6 +9,10 @@ export class RedisService {
   private readonly logger = new Logger("RedisService");
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
+  get client(): Redis {
+    return this.redis;
+  }
+
   async set(key: string, value: string, ttl?: number): Promise<void> {
     const val = typeof value === "string" ? value : JSON.stringify(value);
     try {

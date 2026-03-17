@@ -17,6 +17,10 @@ services:
       ["/usr/local/bin/wait-for-it.sh", "postgres:5432", "--", "/usr/local/bin/docker-entrypoint.sh"]
     environment:
       - NODE_ENV=production
+      - REDIS=redis://redis:6379
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+      - DATABASE_URL=postgres://${POSTGRES_USER:-lifePilotUser}:${POSTGRES_PASSWORD:-lifePilotDB_dev_password}@postgres:5432/${POSTGRES_DB:-lifePilotDB}
 
   redis:
     image: redis:7-alpine
@@ -41,13 +45,13 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-      - POSTGRES_DB=${POSTGRES_DB:-lifepilot}
+      - POSTGRES_USER=${POSTGRES_USER:-lifePilotUser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-lifePilotDB_dev_password}
+      - POSTGRES_DB=${POSTGRES_DB:-lifePilotDB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-lifepilot}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lifePilotUser} -d ${POSTGRES_DB:-lifePilotDB}"]
       interval: 10s
       timeout: 5s
       retries: 5

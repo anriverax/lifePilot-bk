@@ -45,11 +45,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
             ];
 
             if (modelsWithSoftDelete.includes(model) && operationsToFilter.includes(operation)) {
-              if (typeof args === "object" && args !== null) {
-                args["where"] ??= {};
+              const typedArgs = args as Record<string, unknown>;
+              if (typeof typedArgs === "object" && typedArgs !== null) {
+                typedArgs["where"] ??= {};
+                const where = typedArgs["where"] as Record<string, unknown>;
 
-                if (!("deletedAt" in args["where"])) {
-                  args["where"].deletedAt = null;
+                if (!("deletedAt" in where)) {
+                  where.deletedAt = null;
                 }
               }
             }
@@ -58,16 +60,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
           },
           async update({ model, args, query }) {
             if (modelsWithSoftDelete.includes(model)) {
+              const typedArgs = args as Record<string, unknown>;
               if (
-                typeof args === "object" &&
-                args !== null &&
-                "where" in args &&
-                typeof args.where === "object"
+                typeof typedArgs === "object" &&
+                typedArgs !== null &&
+                "where" in typedArgs &&
+                typeof typedArgs.where === "object"
               ) {
-                args.where = args.where ?? {};
+                typedArgs.where = typedArgs.where ?? {};
+                const where = typedArgs.where as Record<string, unknown>;
 
-                if (!("deletedAt" in args.where)) {
-                  args.where["deletedAt"] = null;
+                if (!("deletedAt" in where)) {
+                  where["deletedAt"] = null;
                 }
               }
             }
