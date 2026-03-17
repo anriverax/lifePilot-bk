@@ -5,13 +5,15 @@ WORKDIR /lifePilot
 
 # Copiamos solo los archivos necesarios para instalar dependencias
 COPY package*.json ./
+
+# IMPORTANTE: Copiar prisma ANTES de npm install
+# para que el postinstall script (npx prisma generate) encuentre el schema
+COPY prisma ./prisma
+
 RUN npm install
 
 # Copiamos el código fuente
 COPY . .
-
-# Generamos el cliente de Prisma antes de compilar
-RUN npx prisma generate
 
 RUN npm run build
 
@@ -31,7 +33,6 @@ COPY --from=builder /lifePilot/node_modules ./node_modules
 COPY --from=builder /lifePilot/dist ./dist
 
 COPY package*.json ./
-COPY prisma.config.ts ./
 
 # Copiar entrypoint y wait-for-it desde repo
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
