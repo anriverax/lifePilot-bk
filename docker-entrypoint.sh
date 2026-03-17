@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-npx prisma migrate deploy --config ./prisma/prisma.config.ts --schema ./prisma/schema.prisma
+npx prisma migrate deploy --schema ./prisma/schema.prisma
 
 npx prisma db seed || echo "⚠️ No seed script found, skipping..."
 

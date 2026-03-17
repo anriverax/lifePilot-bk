@@ -1,37 +1,39 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
-import { RedisModule } from './redis/redis.module';
-import { HealthModule } from './health/health.module';
-import { envValidationSchema } from './config/env.validation';
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { HealthModule } from "./health/health.module";
+
+// module - Services
+import { PrismaModule } from "./services/prisma/prisma.module";
+import { RedisModule } from "./services/redis/redis.module";
+import config from './config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
-      validationSchema: envValidationSchema,
-      validationOptions: {
-        abortEarly: false,
-      },
+      load: [config]
     }),
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [
         {
-          ttl: config.get<number>('THROTTLE_TTL', 60000),
-          limit: config.get<number>('THROTTLE_LIMIT', 100),
-        },
-      ],
+          ttl: config.get<number>("THROTTLE_TTL", 60000),
+          limit: config.get<number>("THROTTLE_LIMIT", 100)
+        }
+      ]
     }),
     PrismaModule,
-    RedisModule,
-    HealthModule,
+    RedisModule.forRoot({
+      config: {
+        url: process.env.REDIS
+      }
+    }),
+    HealthModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule {}

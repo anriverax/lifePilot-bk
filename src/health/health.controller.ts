@@ -5,7 +5,7 @@ import {
   HealthIndicatorResult,
   PrismaHealthIndicator,
 } from '@nestjs/terminus';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../services/prisma/prisma.service';
 import { RedisHealthIndicator } from './redis-health.indicator';
 
 @Controller('health')
