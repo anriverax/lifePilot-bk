@@ -5,7 +5,6 @@
 /keys
 
 infrastructure.yml
-docker-entrypoint.sh
 # Logs
 logs
 *.log
@@ -15,7 +14,6 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .yarn
-wait-for-it.sh
 # OS
 .DS_Store
 
@@ -38,7 +36,10 @@ wait-for-it.sh
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-docker-entrypoint.sh
+
+# Prisma generated client
+/prisma/generated
+
 # dotenv environment variable files
 .env
 .env.dev
