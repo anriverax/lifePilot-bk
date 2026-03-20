@@ -1,22 +1,12 @@
 import { prismaAdapter } from "@better-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 import { betterAuth } from "better-auth";
-import { bearer } from "better-auth/plugins";
+import { bearer, emailOTP } from "better-auth/plugins";
 import { Logger } from "@nestjs/common";
-import Redis from "ioredis";
-import { createPrismaClientFactory } from "@/services/prisma/prisma-client.factory";
+import { getSharedRedisClient } from "@/services/redis/redis-singleton";
+import { getSharedPrismaClient } from "@/services/prisma/prisma-singleton";
+import { sendEmail, sendOTPEmail } from "@/lib/email";
 
 const logger = new Logger("Auth");
-
-const { clientOptions } = createPrismaClientFactory({
-  connectionString: process.env.DATABASE_URL,
-  nodeEnv: process.env.NODE_ENV
-});
-
-const prisma = new PrismaClient(clientOptions);
-
-const redis = new Redis(process.env.REDIS ?? "redis://localhost:6379");
-redis.on("error", (err) => logger.error("❌ Redis connection error in auth module", err));
 
 const trustedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000")
   .split(",")
@@ -30,50 +20,93 @@ export const auth = betterAuth({
     `http://localhost:${process.env.PORT ?? 3001}`,
   trustedOrigins,
   secret: process.env.BETTER_AUTH_SECRET,
-  database: prismaAdapter(prisma, {
+
+  /** Prisma adapter — uses the shared singleton pool, no extra connection opened. */
+  database: prismaAdapter(getSharedPrismaClient(), {
     provider: "postgresql"
   }),
+
   /**
-   * Redis is used as secondary (fast) storage for sessions.
-   * Sessions are still persisted in the database (storeSessionInDatabase: true)
-   * but reads are served from Redis for performance, replacing a manual JWT+Redis layer.
+   * Redis secondary storage — uses the shared singleton client.
+   * Session reads are served from Redis; writes persist to both Redis and the DB.
    */
   secondaryStorage: {
-    get: async (key: string) => {
-      return redis.get(key);
-    },
+    get: async (key: string) => getSharedRedisClient().get(key),
     set: async (key: string, value: string, ttl?: number) => {
       if (ttl) {
-        await redis.set(key, value, "EX", ttl);
+        await getSharedRedisClient().set(key, value, "EX", ttl);
       } else {
-        await redis.set(key, value);
+        await getSharedRedisClient().set(key, value);
       }
     },
     delete: async (key: string) => {
-      await redis.del(key);
+      await getSharedRedisClient().del(key);
     }
   },
+
   session: {
+    /** Persist sessions to the DB (Session table) for active-session visibility. */
     storeSessionInDatabase: true,
+    /** Session lifetime: 7 days. */
+    expiresIn: 60 * 60 * 24 * 7,
+    /** Refresh sliding window: update session if older than 1 day. */
+    updateAge: 60 * 60 * 24,
+    /** Cookie-cache reduces DB reads on every request. */
     cookieCache: {
       enabled: true,
       maxAge: 300 // 5 minutes
     }
   },
+
   emailAndPassword: {
     enabled: true,
+    /** Require OTP email verification before the account can be used. */
     requireEmailVerification: true,
     autoSignIn: false,
     revokeSessionsOnPasswordReset: true,
     async sendVerificationEmail({ email, url }) {
-      // TODO: integrate with email service (e.g. Resend via RESEND env var)
-      logger.log(`Sending verification email to ${email}: ${url}`);
+      logger.log(`Sending verification email to ${email}`);
+      await sendEmail({
+        to: email,
+        subject: "Verifica tu dirección de correo",
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+            <h2>Verifica tu dirección de correo</h2>
+            <p>Haz clic en el enlace de abajo para verificar tu cuenta:</p>
+            <p><a href="${url}" style="color:#4f46e5">Verificar correo</a></p>
+            <p>Si no puedes hacer clic en el enlace, cópialo en tu navegador:</p>
+            <p style="word-break:break-all">${url}</p>
+          </div>
+        `
+      });
     }
   },
-  /**
-   * The bearer plugin lets API clients authenticate with
-   *   Authorization: Bearer <session-token>
-   * instead of cookies — the JWT-equivalent flow for stateless API access.
-   */
-  plugins: [bearer()]
+
+  plugins: [
+    /**
+     * Bearer plugin: lets API clients authenticate with
+     *   Authorization: Bearer <session-token>
+     * instead of cookies — the stateless API equivalent of JWT.
+     */
+    bearer(),
+
+    /**
+     * Email OTP plugin:
+     *  - sign-up: sends an OTP to confirm email ownership before the account is active.
+     *  - sign-in: sends an OTP as a second-step verification before completing login.
+     *  - forget-password / change-email: OTP-gated flows.
+     */
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 600, // 10 minutes
+      allowedAttempts: 3,
+      storeOTP: "hashed",
+      sendVerificationOnSignUp: true,
+      async sendVerificationOTP({ email, otp, type }) {
+        logger.log(`Sending OTP to ${email} [type=${type}]`);
+        await sendOTPEmail({ to: email, otp, type });
+      }
+    })
+  ]
 });
+

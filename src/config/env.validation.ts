@@ -18,6 +18,9 @@ export const envValidationSchema = Joi.object({
   REDIS_PASSWORD: Joi.string().allow('').optional(),
   REDIS_TTL: Joi.number().integer().positive().default(3600),
 
+  RESEND: Joi.string().optional(),
+  EMAIL_FROM: Joi.string().email().optional(),
+
   BETTER_AUTH_SECRET: Joi.string().min(32).required(),
   BETTER_AUTH_URL: Joi.string().uri().optional(),
 
