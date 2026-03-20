@@ -36,11 +36,7 @@ import { AuthModule } from "@thallesp/nestjs-better-auth";
         }
       ]
     }),
-    RedisModule.forRoot({
-      config: {
-        url: process.env.REDIS
-      }
-    }),
+    RedisModule.forRoot(),
     HealthModule
   ],
   controllers: [AppController],

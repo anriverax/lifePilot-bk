@@ -1,9 +1,8 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { Pool } from "pg";
 import { firstCapitalLetter } from "@/common/helpers/functions";
-import { createPrismaClientFactory } from "./prisma-client.factory";
+import { createPrismaClientOptions } from "./prisma-client.factory";
+import { closeSharedPrismaPool, getSharedPrismaPool } from "./prisma-singleton";
 
 const modelsWithSoftDelete: string[] = [];
 
@@ -11,20 +10,11 @@ const modelsWithSoftDelete: string[] = [];
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  private pool: Pool;
-
-  constructor(_env: ConfigService) {
-    const connectionString = _env.get<string>("database.url");
-    const nodeEnv = _env.get<string>("nodeEnv");
-
-    const { pool, clientOptions } = createPrismaClientFactory({
-      connectionString,
-      nodeEnv
-    });
-
-    super(clientOptions);
-
-    this.pool = pool;
+  constructor() {
+    // Reuse the shared pool so only one pg connection pool exists in the process.
+    // The shared pool is initialised from DATABASE_URL (same value ConfigService would return).
+    const pool = getSharedPrismaPool();
+    super(createPrismaClientOptions(pool));
 
     const extended = this.$extends({
       query: {
@@ -114,7 +104,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleDestroy() {
     await this.$disconnect();
-    await this.pool.end();
+    await closeSharedPrismaPool();
   }
 
   /* eslint-enable @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type */
