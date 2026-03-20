@@ -8,11 +8,20 @@ import { HealthModule } from "./health/health.module";
 // module - Services
 import { PrismaModule } from "./services/prisma/prisma.module";
 import { RedisModule } from "./services/redis/redis.module";
-import config from './config';
-import { envValidationSchema } from './config/env.validation';
+import config from "./config";
+import { envValidationSchema } from "./config/env.validation";
+import { AuthModule } from "@thallesp/nestjs-better-auth";
 
 @Module({
   imports: [
+    PrismaModule,
+    AuthModule.forRoot({
+      bodyParser: {
+        json: { limit: "2mb" },
+        urlencoded: { limit: "2mb", extended: true },
+        rawBody: true
+      }
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
@@ -27,7 +36,6 @@ import { envValidationSchema } from './config/env.validation';
         }
       ]
     }),
-    PrismaModule,
     RedisModule.forRoot({
       config: {
         url: process.env.REDIS

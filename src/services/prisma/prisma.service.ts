@@ -1,9 +1,9 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 import { firstCapitalLetter } from "@/common/helpers/functions";
+import { createPrismaClientFactory } from "./prisma-client.factory";
 
 const modelsWithSoftDelete: string[] = [];
 
@@ -16,18 +16,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   constructor(_env: ConfigService) {
     const connectionString = _env.get<string>("database.url");
     const nodeEnv = _env.get<string>("nodeEnv");
-    const sslEnabled = nodeEnv === "production" ? true : false;
 
-    const pool = new Pool({
+    const { pool, clientOptions } = createPrismaClientFactory({
       connectionString,
-      ssl: sslEnabled ? { rejectUnauthorized: false } : false
+      nodeEnv
     });
 
-    const adapter = new PrismaPg(pool);
-
-    super({
-      adapter
-    });
+    super(clientOptions);
 
     this.pool = pool;
 
