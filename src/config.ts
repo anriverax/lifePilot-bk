@@ -9,11 +9,9 @@ interface IEnv {
     name: string | undefined;
     url: string | undefined;
   };
-  jwt: {
-    expiration: string | undefined;
-    refreshToken: string | undefined;
-    privateKey: string | undefined;
-    publicKey: string | undefined;
+  betterAuth: {
+    secret: string | undefined;
+    url: string | undefined;
   };
   redis: string | undefined;
   resend: string | undefined;
@@ -38,11 +36,9 @@ export default (): IEnv => ({
     name: process.env.POSTGRES_DB?.toString(),
     url: process.env.DATABASE_URL?.toString()
   },
-  jwt: {
-    expiration: process.env.JWT_EXPIRATION?.toString(),
-    refreshToken: process.env.JWT_REFRESH_TOKEN?.toString(),
-    privateKey: process.env.JWT_PRIVATE_KEY?.toString(),
-    publicKey: process.env.JWT_PUBLIC_KEY?.toString()
+  betterAuth: {
+    secret: process.env.BETTER_AUTH_SECRET?.toString(),
+    url: process.env.BETTER_AUTH_URL?.toString()
   },
   redis: process.env.REDIS?.toString(),
   resend: process.env.RESEND?.toString(),
