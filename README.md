@@ -38,7 +38,7 @@ npm run start:dev
 | Variable           | Description                              | Default     |
 |--------------------|------------------------------------------|-------------|
 | `NODE_ENV`         | Application environment                  | development |
-| `PORT`             | HTTP port                                | 3000        |
+| `PORT`             | HTTP port                                | 3001        |
 | `DATABASE_URL`     | PostgreSQL connection string (required)  | —           |
 | `CORS_ORIGINS`     | Comma-separated allowed origins          | http://localhost:3000 |
 
@@ -119,10 +119,12 @@ The `Authorization: Bearer <token>` header is also accepted (Bearer plugin).
 
 | Script                    | Description                        |
 |---------------------------|------------------------------------|
-| `npm run start:dev`       | Start in watch mode                |
+| `npm run start:dev`       | Start in watch mode (port 3001)    |
 | `npm run build`           | Compile TypeScript                 |
 | `npm run start:prod`      | Run compiled app                   |
+| `npm run format`          | Format source files with Prettier  |
 | `npm run lint`            | Lint source files                  |
+| `npm run lint:fix`        | Lint and auto-fix source files     |
 | `npm run prisma:generate` | Regenerate Prisma client           |
 | `npm run prisma:migrate`  | Run migrations (dev)               |
 | `npm run prisma:deploy`   | Deploy migrations (prod)           |
