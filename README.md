@@ -38,7 +38,7 @@ npm run start:dev
 | Variable           | Description                              | Default     |
 |--------------------|------------------------------------------|-------------|
 | `NODE_ENV`         | Application environment                  | development |
-| `PORT`             | HTTP port                                | 3000        |
+| `PORT`             | HTTP port                                | 3001        |
 | `DATABASE_URL`     | PostgreSQL connection string (required)  | —           |
 | `CORS_ORIGINS`     | Comma-separated allowed origins          | http://localhost:3000 |
 

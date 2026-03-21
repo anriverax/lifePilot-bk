@@ -26,7 +26,7 @@ WORKDIR /lifePilot
 
 # Variables de entorno
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3001
 
 COPY --from=builder /lifePilot/prisma ./prisma
 COPY --from=builder /lifePilot/node_modules ./node_modules
@@ -43,6 +43,6 @@ RUN chown -R node:node /lifePilot
 # Usamos usuario no-root
 USER node
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["/usr/local/bin/docker-entrypoint.sh"]
