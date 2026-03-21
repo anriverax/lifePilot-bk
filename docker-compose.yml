@@ -17,6 +17,7 @@ services:
       ["/usr/local/bin/wait-for-it.sh", "postgres:5432", "--", "/usr/local/bin/docker-entrypoint.sh"]
     environment:
       - NODE_ENV=production
+      - PORT=3001
       - REDIS=redis://redis:6379
       - REDIS_HOST=redis
       - POSTGRES_HOST=postgres

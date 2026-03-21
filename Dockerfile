@@ -29,6 +29,7 @@ ENV NODE_ENV=production
 ENV PORT=3001
 
 COPY --from=builder /lifePilot/prisma ./prisma
+COPY --from=builder /lifePilot/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /lifePilot/node_modules ./node_modules
 COPY --from=builder /lifePilot/dist ./dist
 

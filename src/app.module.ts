@@ -11,21 +11,19 @@ import { RedisModule } from "./services/redis/redis.module";
 import config from "./config";
 import { envValidationSchema } from "./config/env.validation";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
+import { auth } from "./lib/auth";
 
 @Module({
   imports: [
-    PrismaModule,
-    AuthModule.forRoot({
-      bodyParser: {
-        json: { limit: "2mb" },
-        urlencoded: { limit: "2mb", extended: true },
-        rawBody: true
-      }
-    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
       validationSchema: envValidationSchema
+    }),
+    PrismaModule,
+    AuthModule.forRoot({
+      auth,
+      enableRawBodyParser: true
     }),
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
