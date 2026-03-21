@@ -91,7 +91,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       }
     });
 
-    Object.assign(this, extended);
+    return extended as this;
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type */

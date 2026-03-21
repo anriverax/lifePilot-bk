@@ -36,9 +36,13 @@ export function getSharedPrismaClient(): PrismaClient {
  * Closes the shared pg Pool. Should only be called during application shutdown.
  */
 export async function closeSharedPrismaPool(): Promise<void> {
+  if (_client) {
+    await _client.$disconnect();
+    _client = null;
+  }
+
   if (_pool) {
     await _pool.end();
     _pool = null;
-    _client = null;
   }
 }

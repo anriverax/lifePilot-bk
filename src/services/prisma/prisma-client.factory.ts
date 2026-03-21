@@ -61,14 +61,3 @@ export const createPrismaClientOptions = (pool: Pool): Prisma.PrismaClientOption
  * @param params - Parámetros que incluyen la cadena de conexión y el entorno.
  * @returns Un objeto con el pool de pg y las opciones de configuración del cliente de Prisma.
  */
-export const createPrismaClientFactory = ({
-  connectionString,
-  nodeEnv
-}: CreatePrismaClientFactoryParams): { pool: Pool; clientOptions: Prisma.PrismaClientOptions } => {
-  const pool = createPrismaPool({ connectionString, nodeEnv });
-
-  return {
-    pool,
-    clientOptions: createPrismaClientOptions(pool)
-  };
-};
