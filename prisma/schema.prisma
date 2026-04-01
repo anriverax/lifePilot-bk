@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated"
 }
 
 datasource db {
@@ -31,7 +32,7 @@ model Person {
 }
 
 model User {
-  id          Int        @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   email         String    @unique
   passwd        String
   avatar        String?
@@ -53,7 +54,7 @@ model User {
 }
 
 model Session {
-  id          Int        @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   expiresAt DateTime
   token     String   @unique
   createdAt DateTime @default(now())
@@ -67,7 +68,7 @@ model Session {
 }
 
 model Account {
-  id          Int        @id @default(autoincrement())
+  id                    Int       @id @default(autoincrement())
   accountId             String
   providerId            String
   userId                Int
