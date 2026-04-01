@@ -1,0 +1,11 @@
+enum TypeGender {
+  M
+  H
+}
+
+
+enum RoleType {
+  ADMIN
+  USER
+  USER_DEMO
+}

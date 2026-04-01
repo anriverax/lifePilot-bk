@@ -1,0 +1,46 @@
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        RoleType
+  Permissions RolePermission[]
+  Users       User[]
+}
+
+model Permission {
+  id        Int              @id @default(autoincrement())
+  name      String           @unique
+  MenuItems MenuPermission[]
+  Roles     RolePermission[]
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  isActive     Boolean
+  roleId       Int
+  permissionId Int
+  Permission   Permission @relation(fields: [permissionId], references: [id])
+  Role         Role       @relation(fields: [roleId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
+model MenuItem {
+  id         Int              @id @default(autoincrement())
+  title      String
+  path       String
+  icon       String?
+  order      Float
+  parentId   Int?
+  Parent     MenuItem?        @relation("Menu", fields: [parentId], references: [id])
+  Children   MenuItem[]       @relation("Menu")
+  Permission MenuPermission[]
+}
+
+model MenuPermission {
+  id           Int        @id @default(autoincrement())
+  menuId       Int
+  permissionId Int
+  Menu         MenuItem   @relation(fields: [menuId], references: [id])
+  Permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([menuId, permissionId])
+}

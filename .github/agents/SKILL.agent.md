@@ -60,7 +60,6 @@ Do not soften findings. Do not skip minor issues.
 ## Review Categories
 
 > Already covered by specialized agents — do NOT duplicate here:
->
 > - Duplicate code, complexity, naming → `code-reviewer`
 > - XSS/CSRF, re-renders, Next.js patterns → `nextjs-architect`
 > - N+1, blocking ops, optimization → `performance-engineer`
@@ -68,20 +67,17 @@ Do not soften findings. Do not skip minor issues.
 > - NestJS modules, controllers, DTOs → `nestjs-architect`
 
 ### 1. Type Safety
-
 - Type safety verification
 - Missing or incorrect TypeScript types
 - Unsafe type assertions (`as`, `!`)
 
 ### 2. Bug Detection
-
 - Potential bug pattern detection
 - Null/undefined handling check
 - Error handling inspection
 - Boundary condition verification
 
 ### 3. Security
-
 - SQL Injection pattern detection
 - Sensitive information exposure check (tokens, secrets, env vars in code)
 - Authentication/authorization logic review
