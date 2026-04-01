@@ -1,5 +1,7 @@
 import { PersonEntity } from "../entities/person.entity";
 
+export const SYSTEM_USER_ID = 0;
+
 export interface CreatePersonData {
   firstName: string;
   lastName: string;

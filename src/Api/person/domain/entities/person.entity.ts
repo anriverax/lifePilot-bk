@@ -1,3 +1,4 @@
+/** Mirrors the Prisma TypeGender enum. M = Mujer (Female), H = Hombre (Male). */
 export enum Gender {
   M = "M",
   H = "H",

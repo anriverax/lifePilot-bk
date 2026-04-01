@@ -4,6 +4,7 @@ import { PersonEntity } from "../../domain/entities/person.entity";
 import {
   CreatePersonData,
   PersonRepositoryPort,
+  SYSTEM_USER_ID,
 } from "../../domain/ports/person-repository.port";
 import { TypeGender } from "@prisma/client";
 
@@ -21,7 +22,7 @@ export class PrismaPersonRepository implements PersonRepositoryPort {
         phoneNumber: data.phoneNumber,
         birthdate: data.birthdate ?? null,
         districtId: data.districtId,
-        createdBy: data.createdBy ?? 0,
+        createdBy: data.createdBy ?? SYSTEM_USER_ID,
       },
     });
 
