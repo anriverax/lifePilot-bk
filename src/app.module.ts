@@ -13,6 +13,10 @@ import { envValidationSchema } from "./config/env.validation";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
 import { auth } from "./lib/auth";
 
+// module - Api
+import { PersonModule } from "./Api/person/person.module";
+import { UserModule } from "./Api/user/user.module";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -35,7 +39,9 @@ import { auth } from "./lib/auth";
       ]
     }),
     RedisModule.forRoot(),
-    HealthModule
+    HealthModule,
+    PersonModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService]
