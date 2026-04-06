@@ -2,8 +2,8 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { CreateAuthCommand } from "./create-auth.command";
 import { ConflictException, Inject } from "@nestjs/common";
 import { AUTH_REPOSITORY, AuthRepositoryPort } from "../repositories/auth-repository.port";
-import { USER_REPOSITORY, UserRepositoryPort } from "@/api/user/repositories/user-repository.port";
-import { AuthService } from "../../domain/auth.service";
+import { AuthService } from "../../domain/services/auth.service";
+import { USER_REPOSITORY, UserRepositoryPort } from '@/api/user/application/repositories/user-repository.port';
 
 @CommandHandler(CreateAuthCommand)
 export class CreateAuthHandler implements ICommandHandler<CreateAuthCommand> {

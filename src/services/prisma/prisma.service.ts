@@ -1,9 +1,9 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Prisma, PrismaClient } from "@/prisma/generated/client";
 
 import { firstCapitalLetter } from "@/common/helpers/functions";
 import { createPrismaClientOptions } from "./prisma-client.factory";
 import { closeSharedPrismaPool, getSharedPrismaPool } from "./prisma-singleton";
-import { Prisma, PrismaClient } from "@prisma/client";
 
 /**
  * Lista de nombres de modelos de Prisma que admiten eliminación lógica (soft delete).
@@ -111,7 +111,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     where: Prisma.Args<PrismaClient[T], "update">["where"],
     additionalData?: Prisma.Args<PrismaClient[T], "update">["data"]
   ) {
-    if (typeof this[modelName] !== "object" || typeof (this[modelName] as any).update !== "function") {
+    const delegate = (this as unknown as Record<string, unknown>)[String(modelName)] as
+      | { update?: (params: { where: unknown; data: unknown }) => unknown }
+      | undefined;
+
+    if (typeof delegate !== "object" || typeof delegate.update !== "function") {
       throw new Error(
         `El modelo ${String(modelName)} no se encuentra o no admite operaciones de actualización.`
       );
@@ -130,7 +134,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       deletedAt: new Date()
     };
 
-    return (this[modelName] as any).update({ where, data });
+    return delegate.update({ where, data });
   }
 
   /**

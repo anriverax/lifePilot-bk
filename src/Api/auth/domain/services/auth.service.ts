@@ -1,14 +1,12 @@
+import { Inject, Injectable } from "@nestjs/common";
+import { IPasswordHasher, PASSWORD_HASHER } from "../../infrastructure/security/argon/password-hasher.port";
 
-import { Injectable, Logger } from '@nestjs/common';
-import * as argon from "argon2";
-
-@Injectable({})
+@Injectable()
 export class AuthService {
-  private readonly logger = new Logger("AuthService");
-  constructor() {}
+  constructor(@Inject(PASSWORD_HASHER) private readonly passwordHashing: IPasswordHasher) {}
 
   async hashPassword(password: string): Promise<string> {
-    return argon.hash(password);
+    return await this.passwordHashing.hashPassword(password);
   }
   /*
   async verifyPasswd(hashedPassword: string, passwd: string): Promise<void> {

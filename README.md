@@ -137,3 +137,18 @@ GET /health
 ```
 
 Returns the status of connected services (PostgreSQL via Prisma).
+
+
+
+
+
+auth/application
+auth/application/create-auth.command.ts
+auth/application/create-auth.handler.ts
+auth/infrastructure
+auth/infrastructure/auth.controller.ts
+auth/infrastructure/auth.repository.ts
+auth/infrastructure/security/password-hasher.port.ts
+auth/infrastructure/security/argon-password-hasher.adapter.ts
+auth/infrastructure/email/email-sender.port.ts
+auth/infrastructure/email/resend-email.adapter.ts
