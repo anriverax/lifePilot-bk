@@ -3,7 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated"
 }
 
 datasource db {
@@ -28,7 +27,10 @@ model Person {
   updatedBy Int?
   deletedBy Int?
 
-  @@index([firstName, lastName, gender, districtId])
+  District District @relation(fields: [districtId], references: [id])
+  User     User?
+
+  @@index([firstName, lastName, districtId])
 }
 
 model User {
@@ -46,9 +48,10 @@ model User {
   updatedBy     Int?
   deletedBy     Int?
 
-  sessions Session[]
-  accounts Account[]
-  roles    Role      @relation(fields: [roleId], references: [id])
+  Sessions Session[]
+  Accounts Account[]
+  Roles    Role      @relation(fields: [roleId], references: [id])
+  Person   Person    @relation(fields: [personId], references: [id])
 
   @@index([email, roleId, personId])
 }
@@ -62,7 +65,8 @@ model Session {
   ipAddress String?
   userAgent String?
   userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -72,7 +76,7 @@ model Account {
   accountId             String
   providerId            String
   userId                Int
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?

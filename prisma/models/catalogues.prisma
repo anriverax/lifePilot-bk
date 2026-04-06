@@ -44,3 +44,27 @@ model MenuPermission {
 
   @@unique([menuId, permissionId])
 }
+
+model Department {
+  id           Int            @id @default(autoincrement())
+  name         String
+  geonameId    Int            @unique
+  zoneId       Int
+  Municipality Municipality[]
+}
+
+model Municipality {
+  id           Int        @id @default(autoincrement())
+  name         String     @unique
+  departmentId Int
+  District     District[]
+  Department   Department @relation(fields: [departmentId], references: [id])
+}
+
+model District {
+  id             Int          @id @default(autoincrement())
+  name           String
+  municipalityId Int
+  Municipality   Municipality @relation(fields: [municipalityId], references: [id])
+  Person         Person[]
+}

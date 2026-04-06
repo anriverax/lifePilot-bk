@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { CqrsModule } from "@nestjs/cqrs";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { HealthModule } from "./health/health.module";
@@ -14,8 +15,8 @@ import { AuthModule } from "@thallesp/nestjs-better-auth";
 import { auth } from "./lib/auth";
 
 // module - Api
-import { PersonModule } from "./Api/person/person.module";
-import { UserModule } from "./Api/user/user.module";
+import { PersonModule } from "./api/person/person.module";
+import { UserModule } from "./api/user/user.module";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserModule } from "./Api/user/user.module";
       load: [config],
       validationSchema: envValidationSchema
     }),
+    CqrsModule,
     PrismaModule,
     AuthModule.forRoot({
       auth,

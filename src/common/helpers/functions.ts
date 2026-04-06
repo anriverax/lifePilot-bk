@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Logger } from "@nestjs/common";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import { AES, enc } from "crypto-js";
 
 export function handlePrismaError(module: string, error: any): never {
   const logger = new Logger(module);
@@ -16,4 +17,20 @@ export function handlePrismaError(module: string, error: any): never {
 
 export function firstCapitalLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function decryptTextTransformer(value: string): string {
+  if (process.env.PLAIN_TEXT) {
+    try {
+      const result = AES.decrypt(value, process.env.PLAIN_TEXT);
+      return result.toString(enc.Utf8);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error("Error de descifrado: " + error.message);
+      }
+      throw new Error("Error de descifrado desconocido.");
+    }
+  }
+
+  throw new Error("El descifrado no está habilitado.");
 }

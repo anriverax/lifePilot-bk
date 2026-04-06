@@ -1,8 +1,9 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import { Prisma, PrismaClient } from "@prisma/client";
+
 import { firstCapitalLetter } from "@/common/helpers/functions";
 import { createPrismaClientOptions } from "./prisma-client.factory";
 import { closeSharedPrismaPool, getSharedPrismaPool } from "./prisma-singleton";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 /**
  * Lista de nombres de modelos de Prisma que admiten eliminación lógica (soft delete).
