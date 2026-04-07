@@ -16,14 +16,8 @@ export class PrismaAuthRepository implements AuthRepositoryPort {
         phoneNumber: data.phoneNumber,
         birthdate: data.birthdate ?? null,
         districtId: data.districtId,
-        createdBy: data.createdBy ?? SYSTEM_USER_ID,
-        User: {
-          create: {
-            email: data.email,
-            passwd: data.passwd,
-            roleId: data.roleId
-          }
-        }
+        userId: data.userId,
+        createdBy: data.createdBy ?? SYSTEM_USER_ID
       },
       select: {
         id: true

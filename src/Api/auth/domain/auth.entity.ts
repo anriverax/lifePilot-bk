@@ -13,9 +13,9 @@ export interface CreateAuthInput {
   districtId: number;
   email: string;
   passwd: string;
-  roleId: number;
 }
 
-export interface CreateAuthWithCreator extends CreateAuthInput {
+export interface CreateAuthWithCreator extends Omit<CreateAuthInput, "email" | "passwd" | "roleId"> {
+  userId: number;
   createdBy: number;
 }

@@ -70,8 +70,4 @@ export class AuthDto {
     message: "La contraseña debe contener al menos una mayúscula, una minúscula y un número."
   })
   passwd: string = "";
-
-  @IsNotEmpty({ message: "El rol es obligatorio." })
-  @IsNumber()
-  roleId: number = 0;
 }

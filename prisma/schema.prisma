@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client"
-  output = "./generated"
+  output   = "./generated"
 }
 
 datasource db {
@@ -19,19 +19,19 @@ model Person {
   phoneNumber String
   birthdate   DateTime?  @db.Date
   districtId  Int
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  userId      Int        @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
 
   createdBy Int  @default(0)
   updatedBy Int?
   deletedBy Int?
 
   District District @relation(fields: [districtId], references: [id])
-  User     User?
+  User     User     @relation(fields: [userId], references: [id])
 
-  @@index([firstName, lastName, districtId])
+  @@index([firstName, lastName, districtId, userId])
 }
 
 model User {
@@ -41,20 +41,20 @@ model User {
   avatar        String?
   emailVerified Boolean   @default(false)
   lastLoginDate DateTime?
-  roleId        Int
-  personId      Int       @unique
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
-  updatedBy     Int?
-  deletedBy     Int?
+  roleId        Int       @default(1)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  updatedBy Int?
+  deletedBy Int?
 
   Sessions Session[]
   Accounts Account[]
-  Roles    Role      @relation(fields: [roleId], references: [id])
-  Person   Person    @relation(fields: [personId], references: [id])
+  Person   Person?
+  Roles    Role     @relation(fields: [roleId], references: [id])
 
-  @@index([email, roleId, personId])
+  @@index([email, roleId])
 }
 
 model Session {
