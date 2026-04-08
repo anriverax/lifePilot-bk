@@ -1,18 +1,16 @@
 import { Body, Post } from "@nestjs/common";
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { AuthDto } from "../application/auth.dto";
+import { CommandBus } from "@nestjs/cqrs";
 import { NestResponse } from "@/common/helpers/types";
+import { AuthDto } from "./application/auth.dto";
+import { CreateAuthCommand } from "./application/commands/create-auth.command";
 
 export class AuthController {
-  constructor(
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus
-  ) {}
+  constructor(private readonly commandBus: CommandBus) {}
   @Post("register")
   async register(@Body() data: AuthDto): Promise<NestResponse<{ id: number }>> {
     // Implement registration logic here, e.g.:
-    // const userId = await this.commandBus.execute(new RegisterUserCommand(dto));
-    // return { id: userId };
+    const userId = await this.commandBus.execute(new CreateAuthCommand(data));
+    console.log(userId);
     return {
       statusCode: 200,
       message:

@@ -1,33 +1,23 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { CreateAuthCommand } from "./create-auth.command";
-import { ConflictException, Inject, InternalServerErrorException } from "@nestjs/common";
-import {
-  AUTH_REPOSITORY,
-  AuthRepositoryPort,
-  SYSTEM_USER_ID
-} from "../repositories/auth-repository.port";
-import { AuthService } from "../../domain/services/auth.service";
-import {
-  USER_REPOSITORY,
-  UserRepositoryPort
-} from "@/api/user/application/repositories/user-repository.port";
+import { ConflictException, InternalServerErrorException } from "@nestjs/common";
 import { auth } from "@/lib/auth";
+import { hashPassword } from "@/lib/argon";
+import { AuthRepository, SYSTEM_USER_ID } from "../../repositories/auth.repository";
+import { UserRepository } from "../../repositories/user.repository";
 
 @CommandHandler(CreateAuthCommand)
 export class CreateAuthHandler implements ICommandHandler<CreateAuthCommand> {
   constructor(
-    @Inject(AUTH_REPOSITORY)
-    private readonly authRepository: AuthRepositoryPort,
+    private readonly authRepository: AuthRepository,
 
-    @Inject(USER_REPOSITORY)
-    private readonly userRepository: UserRepositoryPort,
-    private readonly authService: AuthService
+    private readonly userRepository: UserRepository
   ) {}
   async execute(command: CreateAuthCommand): Promise<{ id: number }> {
     const { data } = command;
     const { email, passwd, ...rest } = data;
 
-    const hashedPassword = await this.authService.hashPassword(passwd);
+    const hashedPassword = await hashPassword(passwd);
 
     try {
       await auth.api.signUpEmail({

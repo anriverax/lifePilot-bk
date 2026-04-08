@@ -11,12 +11,11 @@ import { PrismaModule } from "./services/prisma/prisma.module";
 import { RedisModule } from "./services/redis/redis.module";
 import config from "./config";
 import { envValidationSchema } from "./config/env.validation";
-import { AuthModule } from "@thallesp/nestjs-better-auth";
+import { AuthModule as BetterAuthModule } from "@thallesp/nestjs-better-auth";
 import { auth } from "./lib/auth";
 
 // module - Api
-import { PersonModule } from "./api/person/person.module";
-import { UserModule } from "./api/user/user.module";
+import { AuthModule } from "./api/auth/auth.module";
 
 @Module({
   imports: [
@@ -27,7 +26,7 @@ import { UserModule } from "./api/user/user.module";
     }),
     CqrsModule,
     PrismaModule,
-    AuthModule.forRoot({
+    BetterAuthModule.forRoot({
       auth,
       enableRawBodyParser: true
     }),
@@ -42,8 +41,7 @@ import { UserModule } from "./api/user/user.module";
     }),
     RedisModule.forRoot(),
     HealthModule,
-    PersonModule,
-    UserModule
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService]

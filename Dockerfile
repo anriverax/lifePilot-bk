@@ -1,5 +1,5 @@
 # Etapa 1: Builder
-FROM node:20-alpine3.21 AS builder
+FROM node:22-alpine3.21 AS builder
 
 WORKDIR /lifePilot
 
@@ -10,10 +10,10 @@ COPY package*.json ./
 # para que el postinstall script (npx prisma generate) encuentre el schema
 COPY prisma ./prisma
 
-RUN npm install
-
 # Copiamos el código fuente
 COPY . .
+
+RUN npm install
 
 RUN npm run build
 

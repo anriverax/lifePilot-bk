@@ -4,7 +4,7 @@ import { bearer, emailOTP } from "better-auth/plugins";
 import { Logger } from "@nestjs/common";
 import { getSharedRedisClient } from "@/services/redis/redis-singleton";
 import { getSharedPrismaClient } from "@/services/prisma/prisma-singleton";
-import { sendEmail, sendOTPEmail } from "@/lib/email";
+import { sendOTPEmail } from "@/lib/email";
 
 const logger = new Logger("Auth");
 
@@ -63,23 +63,7 @@ export const auth = betterAuth({
     /** Require OTP email verification before the account can be used. */
     requireEmailVerification: true,
     autoSignIn: false,
-    revokeSessionsOnPasswordReset: true,
-    async sendVerificationEmail({ email, url }) {
-      logger.log(`Sending verification email to ${email}`);
-      await sendEmail({
-        to: email,
-        subject: "Verifica tu dirección de correo",
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
-            <h2>Verifica tu dirección de correo</h2>
-            <p>Haz clic en el enlace de abajo para verificar tu cuenta:</p>
-            <p><a href="${url}" style="color:#4f46e5">Verificar correo</a></p>
-            <p>Si no puedes hacer clic en el enlace, cópialo en tu navegador:</p>
-            <p style="word-break:break-all">${url}</p>
-          </div>
-        `
-      });
-    }
+    revokeSessionsOnPasswordReset: true
   },
 
   plugins: [
@@ -109,4 +93,3 @@ export const auth = betterAuth({
     })
   ]
 });
-

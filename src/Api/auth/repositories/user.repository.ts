@@ -1,12 +1,12 @@
 import { PrismaService } from "@/services/prisma/prisma.service";
+import { Injectable } from "@nestjs/common";
+import { AuthUser } from "../domain/user.entity";
 
-import { UserRepositoryPort } from "./user-repository.port";
-import { FindUserByIdOrEmailResponse } from '../../domain/entities/user.entity';
-
-export class PrismaUserRepository implements UserRepositoryPort {
+@Injectable()
+export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByIdOrEmail(id?: number, email?: string): Promise<FindUserByIdOrEmailResponse | null> {
+  async findByIdOrEmail(id?: number, email?: string): Promise<AuthUser | null> {
     const where: any = {};
     if (email) where.email = email;
     if (id) where.id = id;
@@ -18,8 +18,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
         email: true,
         passwd: true,
         avatar: true,
-        emailVerified: true,
-        personId: true
+        emailVerified: true
       }
     });
 

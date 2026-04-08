@@ -1,9 +1,12 @@
 import { PrismaService } from "@/services/prisma/prisma.service";
 
-import { AuthRepositoryPort, SYSTEM_USER_ID } from "./auth-repository.port";
-import { CreateAuthWithCreator, Gender } from "../../domain/auth.entity";
+import { CreateAuthWithCreator, Gender } from "../domain/auth.entity";
+import { Injectable } from "@nestjs/common";
 
-export class PrismaAuthRepository implements AuthRepositoryPort {
+export const SYSTEM_USER_ID = 0;
+
+@Injectable()
+export class AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateAuthWithCreator): Promise<{ id: number }> {
