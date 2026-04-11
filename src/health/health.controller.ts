@@ -1,27 +1,15 @@
 import { Controller, Get } from "@nestjs/common";
-import {
-  HealthCheck,
-  HealthCheckResult,
-  HealthCheckService,
-  HealthIndicatorResult
-} from "@nestjs/terminus";
-import { PrismaService } from "@/services/prisma/prisma.service";
+import { HealthCheck } from "@nestjs/terminus";
+import { AllowAnonymous } from "@thallesp/nestjs-better-auth";
 
 @Controller("health")
+@AllowAnonymous()
 export class HealthController {
-  constructor(
-    private readonly health: HealthCheckService,
-    private readonly prisma: PrismaService
-  ) {}
+  constructor() {}
 
   @Get()
   @HealthCheck()
-  check(): Promise<HealthCheckResult> {
-    return this.health.check([
-      async (): Promise<HealthIndicatorResult> => {
-        await this.prisma.$queryRaw`SELECT 1`;
-        return { database: { status: "up" } };
-      }
-    ]);
+  check(): string {
+    return "HOLA";
   }
 }

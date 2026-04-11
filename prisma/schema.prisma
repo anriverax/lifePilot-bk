@@ -37,7 +37,7 @@ model Person {
 model User {
   id            Int       @id @default(autoincrement())
   email         String    @unique
-  passwd        String
+  password      String
   avatar        String?
   emailVerified Boolean   @default(false)
   lastLoginDate DateTime?
@@ -52,7 +52,7 @@ model User {
   Sessions Session[]
   Accounts Account[]
   Person   Person?
-  Roles    Role     @relation(fields: [roleId], references: [id])
+  Roles    Role      @relation(fields: [roleId], references: [id])
 
   @@index([email, roleId])
 }

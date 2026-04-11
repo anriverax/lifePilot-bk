@@ -15,7 +15,9 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
-    "strictBindCallApply": true,
+    "strictBindCallApply": false,
+    // new
+    "noFallthroughCasesInSwitch": false,
     "strictFunctionTypes": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -23,7 +25,5 @@
       "@/*": ["./src/*"],
       "@/prisma/*": ["./prisma/*"]
     }
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  }
 }

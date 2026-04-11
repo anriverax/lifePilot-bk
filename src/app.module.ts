@@ -1,9 +1,6 @@
-import { Module } from "@nestjs/common";
+import { ClassSerializerInterceptor, Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ThrottlerModule } from "@nestjs/throttler";
-import { CqrsModule } from "@nestjs/cqrs";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 import { HealthModule } from "./health/health.module";
 
 // module - Services
@@ -16,6 +13,9 @@ import { auth } from "./lib/auth";
 
 // module - Api
 import { AuthModule } from "./api/auth/auth.module";
+import { APP_INTERCEPTOR } from "@nestjs/core";
+import { SuccessResponseInterceptor } from "./common/interceptors/success-response.interceptor";
+import { ErrorHandlingModule } from "./services/errorHandling/errorHandling.module";
 
 @Module({
   imports: [
@@ -24,7 +24,6 @@ import { AuthModule } from "./api/auth/auth.module";
       load: [config],
       validationSchema: envValidationSchema
     }),
-    CqrsModule,
     PrismaModule,
     BetterAuthModule.forRoot({
       auth,
@@ -39,11 +38,22 @@ import { AuthModule } from "./api/auth/auth.module";
         }
       ]
     }),
+    ErrorHandlingModule,
+    PrismaModule,
     RedisModule.forRoot(),
     HealthModule,
     AuthModule
   ],
-  controllers: [AppController],
-  providers: [AppService]
+  controllers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SuccessResponseInterceptor
+    }
+  ]
 })
 export class AppModule {}

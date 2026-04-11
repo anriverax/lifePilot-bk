@@ -18,7 +18,7 @@ export class CreateAuthHandler implements ICommandHandler<CreateAuthCommand> {
     const { email, passwd, ...rest } = data;
 
     const hashedPassword = await hashPassword(passwd);
-
+    console.log(data);
     try {
       await auth.api.signUpEmail({
         body: {
@@ -43,7 +43,7 @@ export class CreateAuthHandler implements ICommandHandler<CreateAuthCommand> {
       return result;
     } catch (error: unknown) {
       const msg = String((error as any)?.message ?? "").toLowerCase();
-
+      console.log("Error en CreateAuthHandler:", msg, error);
       // Mapeo común para email duplicado
       if (
         msg.includes("already exists") ||

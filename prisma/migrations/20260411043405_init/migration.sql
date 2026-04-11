@@ -1,35 +1,8 @@
-/*
-  Warnings:
-
-  - You are about to drop the `account` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `session` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `verification` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "TypeGender" AS ENUM ('M', 'H');
 
 -- CreateEnum
 CREATE TYPE "RoleType" AS ENUM ('ADMIN', 'USER', 'USER_DEMO');
-
--- DropForeignKey
-ALTER TABLE "account" DROP CONSTRAINT "account_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "session" DROP CONSTRAINT "session_userId_fkey";
-
--- DropTable
-DROP TABLE "account";
-
--- DropTable
-DROP TABLE "session";
-
--- DropTable
-DROP TABLE "users";
-
--- DropTable
-DROP TABLE "verification";
 
 -- CreateTable
 CREATE TABLE "Role" (
@@ -79,6 +52,34 @@ CREATE TABLE "MenuPermission" (
 );
 
 -- CreateTable
+CREATE TABLE "Department" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "geonameId" INTEGER NOT NULL,
+    "zoneId" INTEGER NOT NULL,
+
+    CONSTRAINT "Department_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Municipality" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "departmentId" INTEGER NOT NULL,
+
+    CONSTRAINT "Municipality_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "District" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "municipalityId" INTEGER NOT NULL,
+
+    CONSTRAINT "District_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Person" (
     "id" SERIAL NOT NULL,
     "firstName" TEXT NOT NULL,
@@ -88,6 +89,7 @@ CREATE TABLE "Person" (
     "phoneNumber" TEXT NOT NULL,
     "birthdate" DATE,
     "districtId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -102,12 +104,11 @@ CREATE TABLE "Person" (
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
-    "passwd" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
     "avatar" TEXT,
     "emailVerified" BOOLEAN NOT NULL DEFAULT false,
     "lastLoginDate" TIMESTAMP(3),
-    "roleId" INTEGER NOT NULL,
-    "personId" INTEGER NOT NULL,
+    "roleId" INTEGER NOT NULL DEFAULT 1,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -172,16 +173,22 @@ CREATE UNIQUE INDEX "RolePermission_roleId_permissionId_key" ON "RolePermission"
 CREATE UNIQUE INDEX "MenuPermission_menuId_permissionId_key" ON "MenuPermission"("menuId", "permissionId");
 
 -- CreateIndex
-CREATE INDEX "Person_firstName_lastName_gender_districtId_idx" ON "Person"("firstName", "lastName", "gender", "districtId");
+CREATE UNIQUE INDEX "Department_geonameId_key" ON "Department"("geonameId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Municipality_name_key" ON "Municipality"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Person_userId_key" ON "Person"("userId");
+
+-- CreateIndex
+CREATE INDEX "Person_firstName_lastName_districtId_userId_idx" ON "Person"("firstName", "lastName", "districtId", "userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_personId_key" ON "User"("personId");
-
--- CreateIndex
-CREATE INDEX "User_email_roleId_personId_idx" ON "User"("email", "roleId", "personId");
+CREATE INDEX "User_email_roleId_idx" ON "User"("email", "roleId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_token_key" ON "Session"("token");
@@ -209,6 +216,18 @@ ALTER TABLE "MenuPermission" ADD CONSTRAINT "MenuPermission_menuId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "MenuPermission" ADD CONSTRAINT "MenuPermission_permissionId_fkey" FOREIGN KEY ("permissionId") REFERENCES "Permission"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Municipality" ADD CONSTRAINT "Municipality_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "District" ADD CONSTRAINT "District_municipalityId_fkey" FOREIGN KEY ("municipalityId") REFERENCES "Municipality"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Person" ADD CONSTRAINT "Person_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "District"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Person" ADD CONSTRAINT "Person_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,9 +1,12 @@
-import { Body, Post } from "@nestjs/common";
+import { Body, Controller, Post } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import { NestResponse } from "@/common/helpers/types";
 import { AuthDto } from "./application/auth.dto";
 import { CreateAuthCommand } from "./application/commands/create-auth.command";
+import { AllowAnonymous } from "@thallesp/nestjs-better-auth";
 
+@Controller("/auth")
+@AllowAnonymous()
 export class AuthController {
   constructor(private readonly commandBus: CommandBus) {}
   @Post("register")

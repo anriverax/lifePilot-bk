@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth";
 import { bearer, emailOTP } from "better-auth/plugins";
@@ -16,8 +17,9 @@ export const auth = betterAuth({
   appName: "LifePilot",
   baseURL:
     process.env.BETTER_AUTH_URL ??
-    process.env.SERVER_URL ??
+    process.env.CORS_ORIGINS ??
     `http://localhost:${process.env.PORT ?? 3001}`,
+  basePath: "/api/session", // new
   trustedOrigins,
   secret: process.env.BETTER_AUTH_SECRET,
 

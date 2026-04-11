@@ -19,7 +19,7 @@ export const modelsWithSoftDelete: string[] = [];
 export function getSharedPrismaPool(): Pool {
   if (!_pool) {
     _pool = createPrismaPool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: process.env.DATABASE_URL!,
       nodeEnv: process.env.NODE_ENV
     });
   }

@@ -16,7 +16,7 @@ export class UserRepository {
       select: {
         id: true,
         email: true,
-        passwd: true,
+        password: true,
         avatar: true,
         emailVerified: true
       }
