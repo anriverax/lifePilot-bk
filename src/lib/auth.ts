@@ -22,11 +22,28 @@ export const auth = betterAuth({
   basePath: "/api/session", // new
   trustedOrigins,
   secret: process.env.BETTER_AUTH_SECRET,
-
+  user: {
+    additionalFields: {
+      lastLoginDate: {
+        type: "string",
+        required: false
+      },
+      roleId: {
+        type: "number",
+        required: true,
+        defaultValue: 1
+      }
+    }
+  },
   /** Prisma adapter — uses the shared singleton pool, no extra connection opened. */
   database: prismaAdapter(getSharedPrismaClient(), {
     provider: "postgresql"
   }),
+  advanced: {
+    database: {
+      generateId: "serial"
+    } // 👈 deja que Postgres genere el ID con autoincrement
+  },
 
   /**
    * Redis secondary storage — uses the shared singleton client.

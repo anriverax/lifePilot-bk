@@ -21,6 +21,7 @@ export class SuccessResponseInterceptor implements NestInterceptor {
 
           return {
             ...wrappedData,
+            statusCode: wrappedData.statusCode ?? response.statusCode,
             errors: wrappedData.errors ?? []
           };
         }
@@ -61,6 +62,6 @@ export class SuccessResponseInterceptor implements NestInterceptor {
     }
 
     const candidate = data as Record<string, unknown>;
-    return "statusCode" in candidate && "message" in candidate;
+    return "message" in candidate && ("statusCode" in candidate || "data" in candidate);
   }
 }

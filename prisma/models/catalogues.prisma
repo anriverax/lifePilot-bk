@@ -66,5 +66,4 @@ model District {
   name           String
   municipalityId Int
   Municipality   Municipality @relation(fields: [municipalityId], references: [id])
-  Person         Person[]
 }

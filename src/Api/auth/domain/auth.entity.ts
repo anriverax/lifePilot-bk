@@ -9,8 +9,7 @@ export interface CreateAuthInput {
   address: string;
   gender: Gender;
   phoneNumber: string;
-  birthdate?: Date | null;
-  districtId: number;
+  birthdate: Date;
   email: string;
   passwd: string;
 }

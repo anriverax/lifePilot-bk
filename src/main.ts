@@ -2,7 +2,6 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe, Logger } from "@nestjs/common";
 import helmet from "helmet";
 import { AppModule } from "./app.module";
-import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
@@ -13,7 +12,6 @@ async function bootstrap(): Promise<void> {
   // HTTP security headers
   app.use(helmet());
 
-  app.useGlobalFilters(new HttpExceptionFilter());
   app.setGlobalPrefix("/api");
 
   // Global validation pipe

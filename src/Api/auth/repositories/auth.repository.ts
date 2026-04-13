@@ -17,8 +17,7 @@ export class AuthRepository {
         address: data.address,
         gender: data.gender as Gender,
         phoneNumber: data.phoneNumber,
-        birthdate: data.birthdate ?? null,
-        districtId: data.districtId,
+        birthdate: data.birthdate,
         userId: data.userId,
         createdBy: data.createdBy ?? SYSTEM_USER_ID
       },

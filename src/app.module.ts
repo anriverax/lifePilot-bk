@@ -13,8 +13,9 @@ import { auth } from "./lib/auth";
 
 // module - Api
 import { AuthModule } from "./api/auth/auth.module";
-import { APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { SuccessResponseInterceptor } from "./common/interceptors/success-response.interceptor";
+import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { ErrorHandlingModule } from "./services/errorHandling/errorHandling.module";
 
 @Module({
@@ -46,6 +47,10 @@ import { ErrorHandlingModule } from "./services/errorHandling/errorHandling.modu
   ],
   controllers: [],
   providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor

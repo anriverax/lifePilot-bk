@@ -1,11 +1,10 @@
 import { Transform } from "class-transformer";
 import {
+  IsDate,
   IsEmail,
   IsEnum,
   IsIn,
   IsNotEmpty,
-  IsNumber,
-  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -42,13 +41,10 @@ export class AuthDto {
   @Matches(/^(2|6|7)\d{3}-\d{4}$/)
   phoneNumber: string = "";
 
-  @IsOptional()
+  @IsNotEmpty({ message: "La fecha de nacimiento es obligatoria." })
+  @IsDate({ message: "La fecha de nacimiento debe ser una fecha válida." })
   @Transform(({ value }) => value)
-  birthdate: Date | null = null;
-
-  @IsNotEmpty({ message: "El distrito es obligatorio." })
-  @IsNumber()
-  districtId: number = 0;
+  birthdate: Date = new Date("1990-01-01");
 
   // The user's e-mail address.
   @IsNotEmpty({ message: "El correo electrónico es un campo obligatorio." })
