@@ -22,7 +22,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "db:dev:rm": "docker compose rm -s -f -v",
-    "db:dev:up": "docker compose up -d"
+    "db:dev:up": "docker compose up -d",
+    "prisma:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.5.5",
