@@ -88,7 +88,7 @@ export function getSharedPrismaClient(): PrismaClient {
   if (!_client) {
     const pool = getSharedPrismaPool();
     const options = createPrismaClientOptions(pool) as any;
-    let client = new PrismaClient(options);
+    const client = new PrismaClient(options);
     _client = extendPrismaClientWithSoftDelete(client);
   }
   return _client;
