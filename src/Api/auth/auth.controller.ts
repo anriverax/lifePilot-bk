@@ -1,37 +1,42 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Post, UseInterceptors } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
-import { AuthDto } from "./application/auth.dto";
-import { CreateAuthCommand } from "./application/commands/create-auth.command";
+import { UserDto } from "./application/user.dto";
 import { AllowAnonymous } from "@thallesp/nestjs-better-auth";
+import { VerifyEmailDto } from "./application/verify-email.dto";
+import { VerifyEmailCommand } from "./application/commands/verify-email/verify-email.command";
+import { CreateUserCommand } from "./application/commands/create-user/create-user.command";
 import { auth } from "@/lib/auth";
+import { AuthDto } from "./application/auth.dto";
+import { DecryptBodyInterceptor } from "@/common/interceptors/decrypt-body.interceptor";
+
 @Controller("/auth")
-@AllowAnonymous()
 export class AuthController {
   constructor(private readonly commandBus: CommandBus) {}
+  @AllowAnonymous()
   @Post("register")
-  async register(@Body() data: AuthDto): Promise<{ id: number }> {
-    // Implement registration logic here, e.g.:
+  async register(@Body() data: UserDto): Promise<boolean> {
+    const userId = await this.commandBus.execute(new CreateUserCommand(data));
 
-    const userId = await this.commandBus.execute(new CreateAuthCommand(data));
-
-    return { id: userId.id };
+    return userId;
   }
 
+  @AllowAnonymous()
   @Post("verify-email")
-  async verifyEmail(@Body() { token }: { token: string }): Promise<any> {
-    // Implement email verification logic here, e.g.:
-    // await this.commandBus.execute(new VerifyEmailCommand(token));
-    console.log("Received email verification token:", token);
-    const data = await auth.api.verifyEmailOTP({
+  async verifyEmail(@Body() data: VerifyEmailDto): Promise<boolean> {
+    return await this.commandBus.execute(new VerifyEmailCommand(data));
+  }
+
+  @AllowAnonymous()
+  @UseInterceptors(DecryptBodyInterceptor)
+  @Post("login")
+  async login(@Body() data: AuthDto): Promise<any> {
+    // Implementar lógica de inicio de sesión aquí
+    return auth.api.signInEmail({
       body: {
-        email: "anriverax@gmail.com",
-        otp: token
-      }
+        email: data.email,
+        password: data.passwd
+      },
+      asResponse: true
     });
-    return {
-      statusCode: 200,
-      message: "Correo electrónico verificado exitosamente.",
-      data
-    };
   }
 }

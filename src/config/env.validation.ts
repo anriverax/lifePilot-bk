@@ -24,5 +24,7 @@ export const envValidationSchema = Joi.object({
   CORS_ORIGINS: Joi.string(),
 
   THROTTLE_TTL: Joi.number().integer().positive().default(60000),
-  THROTTLE_LIMIT: Joi.number().integer().positive().default(100)
+  THROTTLE_LIMIT: Joi.number().integer().positive().default(100),
+
+  PLAIN_TEXT: Joi.string().min(16).required()
 });

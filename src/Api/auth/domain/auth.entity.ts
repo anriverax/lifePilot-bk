@@ -3,7 +3,7 @@ export enum Gender {
   H = "H"
 }
 
-export interface CreateAuthInput {
+export interface CreateUserInput {
   firstName: string;
   lastName: string;
   address: string;
@@ -14,7 +14,12 @@ export interface CreateAuthInput {
   passwd: string;
 }
 
-export interface CreateAuthWithCreator extends Omit<CreateAuthInput, "email" | "passwd" | "roleId"> {
+export interface CreateUserWithCreator extends Omit<CreateUserInput, "email" | "passwd" | "roleId"> {
   userId: number;
   createdBy: number;
+}
+
+export interface VerifyEmailOtp {
+  email: string;
+  otp: string;
 }

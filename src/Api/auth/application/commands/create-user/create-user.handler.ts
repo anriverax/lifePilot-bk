@@ -1,19 +1,19 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { CreateAuthCommand } from "./create-auth.command";
 import { ConflictException, InternalServerErrorException } from "@nestjs/common";
 import { auth } from "@/lib/auth";
 import { hashPassword } from "@/lib/argon";
-import { AuthRepository, SYSTEM_USER_ID } from "../../repositories/auth.repository";
-import { UserRepository } from "../../repositories/user.repository";
+import { AuthRepository, SYSTEM_USER_ID } from "../../../repositories/auth.repository";
+import { UserRepository } from "../../../repositories/user.repository";
+import { CreateUserCommand } from "./create-user.command";
 
-@CommandHandler(CreateAuthCommand)
-export class CreateAuthHandler implements ICommandHandler<CreateAuthCommand> {
+@CommandHandler(CreateUserCommand)
+export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   constructor(
     private readonly authRepository: AuthRepository,
 
     private readonly userRepository: UserRepository
   ) {}
-  async execute(command: CreateAuthCommand): Promise<{ id: number }> {
+  async execute(command: CreateUserCommand): Promise<boolean> {
     const { data } = command;
     const { email, passwd, ...rest } = data;
 
@@ -39,8 +39,8 @@ export class CreateAuthHandler implements ICommandHandler<CreateAuthCommand> {
         userId: isExistUser.id,
         createdBy: SYSTEM_USER_ID
       });
-      console.log("Auth creado con ID:", result.id);
-      return result;
+
+      return result ? true : false;
     } catch (error: unknown) {
       const msg = String((error as any)?.message ?? "").toLowerCase();
       // Mapeo común para email duplicado

@@ -1,6 +1,6 @@
 import { PrismaService } from "@/services/prisma/prisma.service";
 
-import { CreateAuthWithCreator, Gender } from "../domain/auth.entity";
+import { CreateUserWithCreator, Gender } from "../domain/auth.entity";
 import { Injectable } from "@nestjs/common";
 
 export const SYSTEM_USER_ID = 0;
@@ -9,7 +9,7 @@ export const SYSTEM_USER_ID = 0;
 export class AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateAuthWithCreator): Promise<{ id: number }> {
+  async create(data: CreateUserWithCreator): Promise<{ id: number }> {
     const person = await this.prisma.person.create({
       data: {
         firstName: data.firstName,

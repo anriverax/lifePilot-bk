@@ -1,11 +1,12 @@
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
-import { CreateAuthHandler } from "./application/commands/create-auth.handler";
+import { CreateUserHandler } from "./application/commands/create-user/create-user.handler";
 import { AuthController } from "./auth.controller";
 import { UserRepository } from "./repositories/user.repository";
 import { AuthRepository } from "./repositories/auth.repository";
+import { VerifyEmailHandler } from "./application/commands/verify-email/verify-email.handler";
 
-const AuthCommand = [CreateAuthHandler];
+const AuthCommand = [CreateUserHandler, VerifyEmailHandler];
 
 const AuthReposity = [UserRepository, AuthRepository];
 // Módulo de NestJS para autenticación.
