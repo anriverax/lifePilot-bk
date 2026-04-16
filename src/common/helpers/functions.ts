@@ -5,19 +5,26 @@ export function firstCapitalLetter(str: string) {
 }
 
 export function decryptTextTransformer(value: string): string {
-  if (process.env.PLAIN_TEXT) {
-    try {
-      const result = AES.decrypt(value, process.env.PLAIN_TEXT);
-      return result.toString(enc.Utf8);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error("Error de descifrado: " + error.message);
-      }
-      throw new Error("Error de descifrado desconocido.");
-    }
+  const secret = process.env.PLAIN_TEXT;
+
+  if (!secret) {
+    throw new Error("El descifrado no está habilitado.");
   }
 
-  throw new Error("El descifrado no está habilitado.");
+  try {
+    const decrypted = AES.decrypt(value, secret).toString(enc.Utf8);
+
+    if (!decrypted) {
+      throw new Error("El resultado del descifrado está vacío. Verifique la clave o el valor cifrado.");
+    }
+
+    return decrypted;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error("Error de descifrado: " + error.message);
+    }
+    throw new Error("Error de descifrado desconocido.");
+  }
 }
 
 export function generateCode(length = 6): string {

@@ -3,7 +3,7 @@ import { IsEmail, IsNotEmpty, IsString, Length, Matches } from "class-validator"
 
 export class VerifyEmailDto {
   @IsNotEmpty({ message: "El correo electrónico es un campo obligatorio." })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => value.toLowerCase().trim())
   @IsString({ message: "La correo electrónico debe ser una cadena de texto." })
   @IsEmail()
   @Matches(

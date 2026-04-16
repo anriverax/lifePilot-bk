@@ -1,13 +1,14 @@
-import { Body, Controller, Post, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Post, Get, UseInterceptors } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { CommandBus } from "@nestjs/cqrs";
 import { UserDto } from "./application/user.dto";
-import { AllowAnonymous } from "@thallesp/nestjs-better-auth";
+import { AllowAnonymous, Session, UserSession } from "@thallesp/nestjs-better-auth";
 import { VerifyEmailDto } from "./application/verify-email.dto";
 import { VerifyEmailCommand } from "./application/commands/verify-email/verify-email.command";
 import { CreateUserCommand } from "./application/commands/create-user/create-user.command";
-import { auth } from "@/lib/auth";
 import { AuthDto } from "./application/auth.dto";
 import { DecryptBodyInterceptor } from "@/common/interceptors/decrypt-body.interceptor";
+import { AuthCommand } from "./application/commands/auth/auth.command";
 
 @Controller("/auth")
 export class AuthController {
@@ -27,16 +28,18 @@ export class AuthController {
   }
 
   @AllowAnonymous()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @UseInterceptors(DecryptBodyInterceptor)
   @Post("login")
-  async login(@Body() data: AuthDto): Promise<any> {
+  async login(@Body() data: AuthDto): Promise<{ token: string; user: unknown }> {
     // Implementar lógica de inicio de sesión aquí
-    return auth.api.signInEmail({
-      body: {
-        email: data.email,
-        password: data.passwd
-      },
-      asResponse: true
-    });
+    return await this.commandBus.execute(new AuthCommand(data));
+  }
+
+  @Get("profile")
+  getProfile(@Session() session: UserSession) {
+    // session.user  → datos del usuario autenticado
+    // session.session → datos de la sesión (expira, token, etc.)
+    return session.user;
   }
 }

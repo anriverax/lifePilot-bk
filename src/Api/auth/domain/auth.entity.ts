@@ -23,3 +23,8 @@ export interface VerifyEmailOtp {
   email: string;
   otp: string;
 }
+
+export interface AuthPayload {
+  email: string;
+  passwd: string;
+}

@@ -1,7 +1,6 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ConflictException, InternalServerErrorException } from "@nestjs/common";
 import { auth } from "@/lib/auth";
-import { hashPassword } from "@/lib/argon";
 import { AuthRepository, SYSTEM_USER_ID } from "../../../repositories/auth.repository";
 import { UserRepository } from "../../../repositories/user.repository";
 import { CreateUserCommand } from "./create-user.command";
@@ -17,14 +16,12 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     const { data } = command;
     const { email, passwd, ...rest } = data;
 
-    const hashedPassword = await hashPassword(passwd);
-
     try {
       await auth.api.signUpEmail({
         body: {
           name: `${rest.firstName} ${rest.lastName}`.trim(),
           email,
-          password: hashedPassword
+          password: passwd
         }
       });
 

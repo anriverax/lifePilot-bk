@@ -62,7 +62,9 @@ export const auth = betterAuth({
       await getSharedRedisClient().del(key);
     }
   },
-
+  rateLimit: {
+    storage: "secondary-storage"
+  },
   session: {
     /** Persist sessions to the DB (Session table) for active-session visibility. */
     storeSessionInDatabase: true,

@@ -152,3 +152,98 @@ auth/infrastructure/security/password-hasher.port.ts
 auth/infrastructure/security/argon-password-hasher.adapter.ts
 auth/infrastructure/email/email-sender.port.ts
 auth/infrastructure/email/resend-email.adapter.ts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BORRAR
+Route Handler
+// app/api/auth/login/route.ts (Next.js App Router)
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { AES } from "crypto-js";
+
+const PLAIN_TEXT = process.env.PLAIN_TEXT!; // misma clave que el backend
+
+export async function POST(request: Request) {
+  const { email, password } = await request.json();
+
+  // Cifrar antes de enviar al backend
+  const body = {
+    [AES.encrypt("email",  PLAIN_TEXT).toString()]: AES.encrypt(email,    PLAIN_TEXT).toString(),
+    [AES.encrypt("passwd", PLAIN_TEXT).toString()]: AES.encrypt(password, PLAIN_TEXT).toString(),
+  };
+
+  const res = await fetch("http://localhost:3001/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    return NextResponse.json(error, { status: res.status });
+  }
+
+  const { data } = await res.json(); // { token, user }
+
+  // Setear cookie httpOnly en el navegador desde Next.js
+  const cookieStore = await cookies();
+  cookieStore.set("session_token", data.token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7, // 7 días (igual que tu config de better-auth)
+    path: "/",
+  });
+
+  return NextResponse.json({ user: data.user });
+}
+Middleware
+// middleware.ts (raíz del proyecto Next.js)
+import { NextRequest, NextResponse } from "next/server";
+
+const PUBLIC_ROUTES = ["/login", "/register", "/verify-email"];
+
+export function middleware(req: NextRequest) {
+  const token = req.cookies.get("session_token")?.value;
+  const isPublic = PUBLIC_ROUTES.some(r => req.nextUrl.pathname.startsWith(r));
+
+  if (!token && !isPublic) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!_next|favicon.ico|api/auth).*)"],
+};
+
+// lib/api.ts
+// lib/api.ts
+export async function fetchProtected(path: string, options?: RequestInit) {
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session_token")?.value;
+
+  return fetch(`http://localhost:3001/api${path}`, {
+    ...options,
+    headers: {
+      ...options?.headers,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+}
