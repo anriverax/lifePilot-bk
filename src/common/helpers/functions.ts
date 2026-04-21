@@ -27,11 +27,12 @@ export function decryptTextTransformer(value: string): string {
   }
 }
 
-export function generateCode(length = 6): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let code = "";
-  for (let i = 0; i < length; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+export function encryptText(value: string): string {
+  const secret = process.env.PLAIN_TEXT;
+
+  if (!secret) {
+    throw new Error("El cifrado no está habilitado: PLAIN_TEXT no definido.");
   }
-  return code;
+
+  return AES.encrypt(value, secret).toString();
 }

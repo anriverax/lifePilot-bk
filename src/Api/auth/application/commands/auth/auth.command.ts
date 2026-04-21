@@ -1,8 +1,8 @@
-import { AuthPayload } from "@/api/auth/domain/auth.entity";
+import { AuthInput } from "@/api/auth/domain/auth.entity";
 import { Command } from "@nestjs/cqrs";
 
 export class AuthCommand extends Command<{ token: string; user: unknown }> {
-  constructor(public readonly data: AuthPayload) {
+  constructor(public readonly data: AuthInput) {
     super();
   }
 }

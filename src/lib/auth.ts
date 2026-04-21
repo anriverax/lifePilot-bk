@@ -6,6 +6,7 @@ import { Logger } from "@nestjs/common";
 import { getSharedRedisClient } from "@/services/redis/redis-singleton";
 import { getSharedPrismaClient } from "@/services/prisma/prisma-singleton";
 import { sendOTPEmail } from "@/lib/email";
+import { encryptText } from "@/common/helpers/functions";
 
 const logger = new Logger("Auth");
 
@@ -42,9 +43,26 @@ export const auth = betterAuth({
   advanced: {
     database: {
       generateId: "serial"
-    } // 👈 deja que Postgres genere el ID con autoincrement
+    }
   },
-
+  databaseHooks: {
+    account: {
+      create: {
+        async before(account) {
+          const withEncryptedTokens = { ...account };
+          if (account.accessToken) {
+            withEncryptedTokens.accessToken = encryptText(account.accessToken);
+          }
+          if (account.refreshToken) {
+            withEncryptedTokens.refreshToken = encryptText(account.refreshToken);
+          }
+          return Promise.resolve({
+            data: withEncryptedTokens
+          });
+        }
+      }
+    }
+  },
   /**
    * Redis secondary storage — uses the shared singleton client.
    * Session reads are served from Redis; writes persist to both Redis and the DB.
@@ -67,7 +85,7 @@ export const auth = betterAuth({
   },
   session: {
     /** Persist sessions to the DB (Session table) for active-session visibility. */
-    storeSessionInDatabase: true,
+    persistSessions: true,
     /** Session lifetime: 7 days. */
     expiresIn: 60 * 60 * 24 * 7,
     /** Refresh sliding window: update session if older than 1 day. */
@@ -78,7 +96,6 @@ export const auth = betterAuth({
       maxAge: 300 // 5 minutes
     }
   },
-
   emailAndPassword: {
     enabled: true,
     /** Require OTP email verification before the account can be used. */

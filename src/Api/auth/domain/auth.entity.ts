@@ -24,7 +24,12 @@ export interface VerifyEmailOtp {
   otp: string;
 }
 
-export interface AuthPayload {
+export interface AuthInput {
   email: string;
   passwd: string;
+}
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
 }

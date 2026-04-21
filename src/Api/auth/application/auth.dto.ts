@@ -10,8 +10,6 @@ export class AuthDto {
 
   @IsNotEmpty({ message: "La contraseña es un campo obligatorio." })
   @IsString()
-  @MinLength(8, { message: "La contraseña debe tener al menos 8 caracteres." })
-  @MaxLength(12, { message: "La contraseña no puede exceder 12 caracteres." })
   @Transform(({ value }) => value.trim())
   passwd: string = "";
 }
