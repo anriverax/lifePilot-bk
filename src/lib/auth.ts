@@ -23,6 +23,7 @@ export const auth = betterAuth({
   basePath: "/api/session", // new
   trustedOrigins,
   secret: process.env.BETTER_AUTH_SECRET,
+
   user: {
     additionalFields: {
       lastLoginDate: {

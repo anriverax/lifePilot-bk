@@ -1,7 +1,7 @@
-import { AuthInput } from "@/api/auth/domain/auth.entity";
+import { AuthInput, AuthResponse } from "@/api/auth/domain/auth.entity";
 import { Command } from "@nestjs/cqrs";
 
-export class AuthCommand extends Command<{ token: string; user: unknown }> {
+export class AuthCommand extends Command<AuthResponse> {
   constructor(public readonly data: AuthInput) {
     super();
   }

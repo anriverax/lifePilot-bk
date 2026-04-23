@@ -29,6 +29,18 @@ export interface AuthInput {
   passwd: string;
 }
 
+export interface AuthResponse {
+  token: string;
+  redirect: boolean;
+  url?: string;
+  user: {
+    name: string;
+    email: string;
+    image: unknown;
+    roleId: number;
+    id: number | string;
+  };
+}
 export interface ChangePasswordInput {
   currentPassword: string;
   newPassword: string;

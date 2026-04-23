@@ -2,22 +2,34 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { AuthCommand } from "./auth.command";
 import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { auth } from "@/lib/auth";
+import { AuthResponse } from '@/api/auth/domain/auth.entity';
 
 @CommandHandler(AuthCommand)
 export class AuthHandler implements ICommandHandler<AuthCommand> {
-  async execute(command: AuthCommand): Promise<{ token: string; user: unknown }> {
+  async execute(command: AuthCommand): Promise<AuthResponse> {
     const { data } = command;
-    const { email, passwd } = data;
 
     try {
       const res = await auth.api.signInEmail({
         body: {
-          email,
-          password: passwd
+          email: data.email,
+          password: data.passwd
         }
       });
 
-      return res;
+      const { user, ...others } = res;
+      const { name, email, image, roleId, id } = user;
+
+      return {
+        ...others,
+        user: {
+          name,
+          email,
+          image,
+          roleId,
+          id
+        }
+      };
     } catch (error) {
       const msg = String((error as any)?.message ?? "").toLowerCase();
 

@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 export class AuthDto {
   @IsNotEmpty({ message: "El correo electrónico es un campo obligatorio." })

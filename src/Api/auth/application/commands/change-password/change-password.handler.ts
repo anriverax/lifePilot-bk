@@ -1,25 +1,26 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { auth } from "@/lib/auth";
+import { fromNodeHeaders } from "better-auth/node";
 import { ChangePasswordCommand } from "./change-password.command";
 
 @CommandHandler(ChangePasswordCommand)
 export class ChangePasswordHandler implements ICommandHandler<ChangePasswordCommand> {
   async execute(command: ChangePasswordCommand): Promise<boolean> {
-    const { data } = command;
-    const { email, otp } = data;
+    const { data, headers } = command;
+    const { currentPassword, newPassword } = data;
 
     try {
-      const res = await auth.api.verifyEmailOTP({
+      const res = await auth.api.changePassword({
         body: {
-          email,
-          otp: otp.toString()
-        }
+          currentPassword,
+          newPassword,
+          revokeOtherSessions: true
+        },
+        headers: fromNodeHeaders(headers)
       });
 
-      console.log("Email verification response:", res);
-
-      if (res.status) {
+      if (res) {
         return true;
       }
 
@@ -27,18 +28,25 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordComm
     } catch (error) {
       const msg = String((error as any)?.message ?? "").toLowerCase();
 
-      if (msg.includes("invalid otp") || msg.includes("invalid code")) {
-        throw new BadRequestException("El código OTP es inválido");
+      if (
+        msg.includes("invalid password") ||
+        msg.includes("incorrect password") ||
+        msg.includes("wrong password")
+      ) {
+        throw new BadRequestException("La contraseña actual es incorrecta");
       }
 
-      if (msg.includes("expired")) {
-        throw new BadRequestException("El código OTP ha expirado");
+      if (msg.includes("same password") || msg.includes("password is the same")) {
+        throw new BadRequestException("La nueva contraseña debe ser diferente a la actual");
       }
 
-      // Si ya es una excepción HTTP de Nest, relanzar
+      if (msg.includes("unauthorized") || msg.includes("not authenticated")) {
+        throw new BadRequestException("No autorizado para realizar esta acción");
+      }
+
       if ((error as any)?.status && (error as any)?.response) throw error;
 
-      throw new InternalServerErrorException("No se pudo verificar el correo");
+      throw new InternalServerErrorException("No se pudo cambiar la contraseña");
     }
   }
 }

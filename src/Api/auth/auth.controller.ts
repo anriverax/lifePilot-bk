@@ -1,6 +1,7 @@
-import { Body, Controller, Post, Get, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Post, Get, Request, UseInterceptors } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { CommandBus } from "@nestjs/cqrs";
+import { Request as ExpressRequest } from "express";
 import { UserDto } from "./application/user.dto";
 import { AllowAnonymous, Session, UserSession } from "@thallesp/nestjs-better-auth";
 import { VerifyEmailDto } from "./application/verify-email.dto";
@@ -9,6 +10,9 @@ import { CreateUserCommand } from "./application/commands/create-user/create-use
 import { AuthDto } from "./application/auth.dto";
 import { DecryptBodyInterceptor } from "@/common/interceptors/decrypt-body.interceptor";
 import { AuthCommand } from "./application/commands/auth/auth.command";
+import { ChangePasswordCommand } from "./application/commands/change-password/change-password.command";
+import { ChangePasswordDto } from "./application/change-password.dto";
+import { AuthResponse } from "./domain/auth.entity";
 
 @Controller("/auth")
 export class AuthController {
@@ -31,9 +35,29 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @UseInterceptors(DecryptBodyInterceptor)
   @Post("login")
-  async login(@Body() data: AuthDto): Promise<{ token: string; user: unknown }> {
-    // Implementar lógica de inicio de sesión aquí
-    return await this.commandBus.execute(new AuthCommand(data));
+  async login(@Body() data: AuthDto): Promise<{ message: string; data: AuthResponse }> {
+    const authResponse = await this.commandBus.execute(new AuthCommand(data));
+
+    return {
+      message: "Inicio de sesión realizado con éxito.",
+      data: authResponse
+    };
+  }
+
+  @UseInterceptors(DecryptBodyInterceptor)
+  @Post("change-password")
+  async changePassword(
+    @Request() req: ExpressRequest,
+    @Body() data: ChangePasswordDto
+  ): Promise<{ message: string; data: boolean }> {
+    const changePasswordResponse = await this.commandBus.execute(
+      new ChangePasswordCommand(data, req.headers)
+    );
+
+    return {
+      message: "Contraseña actualizada con éxito.",
+      data: changePasswordResponse
+    };
   }
 
   @Get("profile")
