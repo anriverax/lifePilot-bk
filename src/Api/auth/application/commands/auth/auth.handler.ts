@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { AuthCommand } from "./auth.command";
 import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { auth } from "@/lib/auth";
-import { AuthResponse } from '@/api/auth/domain/auth.entity';
+import { AuthResponse } from "@/api/auth/domain/auth.entity";
 
 @CommandHandler(AuthCommand)
 export class AuthHandler implements ICommandHandler<AuthCommand> {

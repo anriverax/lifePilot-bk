@@ -6,9 +6,18 @@ import { UserRepository } from "./repositories/user.repository";
 import { AuthRepository } from "./repositories/auth.repository";
 import { VerifyEmailHandler } from "./application/commands/verify-email/verify-email.handler";
 import { AuthHandler } from "./application/commands/auth/auth.handler";
-import { ChangePasswordHandler } from './application/commands/change-password/change-password.handler';
+import { ChangePasswordHandler } from "./application/commands/change-password/change-password.handler";
+import { RequestLoginOtpHandler } from "./application/commands/request-login-otp/request-login-otp.handler";
+import { LoginWithOtpHandler } from "./application/commands/login-with-otp/login-with-otp.handler";
 
-const AuthCommand = [CreateUserHandler, VerifyEmailHandler, AuthHandler, ChangePasswordHandler];
+const AuthCommand = [
+  CreateUserHandler,
+  VerifyEmailHandler,
+  AuthHandler,
+  ChangePasswordHandler,
+  RequestLoginOtpHandler,
+  LoginWithOtpHandler
+];
 
 const AuthReposity = [UserRepository, AuthRepository];
 // Módulo de NestJS para autenticación.

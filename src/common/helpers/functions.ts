@@ -1,6 +1,6 @@
 import { AES, enc } from "crypto-js";
 
-export function firstCapitalLetter(str: string) {
+export function firstCapitalLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
@@ -21,9 +21,9 @@ export function decryptTextTransformer(value: string): string {
     return decrypted;
   } catch (error: unknown) {
     if (error instanceof Error) {
-      throw new Error("Error de descifrado: " + error.message);
+      throw new Error("Error de descifrado: " + error.message, { cause: error });
     }
-    throw new Error("Error de descifrado desconocido.");
+    throw new Error("Error de descifrado desconocido.", { cause: error });
   }
 }
 

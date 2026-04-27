@@ -123,6 +123,7 @@ export const auth = betterAuth({
       otpLength: 6,
       expiresIn: 600, // 10 minutes
       allowedAttempts: 3,
+      disableSignUp: true,
       storeOTP: "hashed",
       sendVerificationOnSignUp: true,
       async sendVerificationOTP({ email, otp, type }) {

@@ -13,6 +13,10 @@ import { AuthCommand } from "./application/commands/auth/auth.command";
 import { ChangePasswordCommand } from "./application/commands/change-password/change-password.command";
 import { ChangePasswordDto } from "./application/change-password.dto";
 import { AuthResponse } from "./domain/auth.entity";
+import { RequestLoginOtpDto } from "./application/request-login-otp.dto";
+import { RequestLoginOtpCommand } from "./application/commands/request-login-otp/request-login-otp.command";
+import { LoginWithOtpDto } from "./application/login-with-otp.dto";
+import { LoginWithOtpCommand } from "./application/commands/login-with-otp/login-with-otp.command";
 
 @Controller("/auth")
 export class AuthController {
@@ -40,6 +44,30 @@ export class AuthController {
 
     return {
       message: "Inicio de sesión realizado con éxito.",
+      data: authResponse
+    };
+  }
+
+  @AllowAnonymous()
+  @Throttle({ default: { limit: 3, ttl: 600000 } })
+  @Post("login-otp/request")
+  async requestLoginOtp(@Body() data: RequestLoginOtpDto): Promise<{ message: string; data: boolean }> {
+    const requestResult = await this.commandBus.execute(new RequestLoginOtpCommand(data));
+
+    return {
+      message: "Si el correo existe, se ha enviado un código de acceso.",
+      data: requestResult
+    };
+  }
+
+  @AllowAnonymous()
+  @Throttle({ default: { limit: 5, ttl: 600000 } })
+  @Post("login-otp/verify")
+  async loginWithOtp(@Body() data: LoginWithOtpDto): Promise<{ message: string; data: AuthResponse }> {
+    const authResponse = await this.commandBus.execute(new LoginWithOtpCommand(data));
+
+    return {
+      message: "Inicio de sesión con código realizado con éxito.",
       data: authResponse
     };
   }

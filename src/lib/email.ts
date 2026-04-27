@@ -52,7 +52,49 @@ export async function sendOTPEmail({
     "change-email": "Confirma tu nueva dirección de correo"
   };
 
+  const contentByType: Record<
+    typeof type,
+    {
+      title: string;
+      intro: string;
+      otpLabel: string;
+      ignoreMessage: string;
+    }
+  > = {
+    "sign-in": {
+      title: "Confirma tu inicio de sesión",
+      intro:
+        'Ingresa el siguiente código en la aplicación para completar el acceso a tu cuenta de <strong style="color:#111827;">Docentes Primera Infancia</strong>.',
+      otpLabel: "Tu código de acceso",
+      ignoreMessage: "Si no intentaste iniciar sesión, puedes ignorar este mensaje de forma segura."
+    },
+    "email-verification": {
+      title: "Verifica tu dirección de correo",
+      intro:
+        'Ingresa el siguiente código en la aplicación para confirmar tu cuenta de <strong style="color:#111827;">Docentes Primera Infancia</strong>.',
+      otpLabel: "Tu código de verificación",
+      ignoreMessage:
+        "Si no solicitaste la creación de una cuenta, puedes ignorar este mensaje de forma segura."
+    },
+    "forget-password": {
+      title: "Restablece tu contraseña",
+      intro:
+        'Ingresa el siguiente código en la aplicación para continuar con el restablecimiento de tu contraseña en <strong style="color:#111827;">Docentes Primera Infancia</strong>.',
+      otpLabel: "Tu código de recuperación",
+      ignoreMessage:
+        "Si no solicitaste cambiar tu contraseña, puedes ignorar este mensaje de forma segura."
+    },
+    "change-email": {
+      title: "Confirma tu nueva dirección de correo",
+      intro:
+        'Ingresa el siguiente código en la aplicación para confirmar el cambio de correo en <strong style="color:#111827;">Docentes Primera Infancia</strong>.',
+      otpLabel: "Tu código de confirmación",
+      ignoreMessage: "Si no solicitaste cambiar tu correo, puedes ignorar este mensaje de forma segura."
+    }
+  };
+
   const subject = subjects[type];
+  const content = contentByType[type];
   const html = `
     <div>
       <!-- Wrapper -->
@@ -126,18 +168,16 @@ export async function sendOTPEmail({
                   </div>
                   <!-- Título -->
                   <h1 style="font-family:Georgia,'Times New Roman',Times,serif; font-size:26px; font-weight:700; color:#111827; margin:0 0 12px; line-height:1.25;">
-                    Verifica tu dirección de correo
+                    ${content.title}
                   </h1>
                   <!-- Saludo -->
                   <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; color:#374151; margin:0 0 32px; line-height:1.65;">
-                    Hola,
-                    ingresa el siguiente código en la aplicación<br>
-                    para confirmar tu cuenta de
-                    <strong style="color:#111827;">Docentes Primera Infancia</strong>.
+                    Hola,<br>
+                    ${content.intro}
                   </p>
                   <!-- Label OTP -->
                   <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 12px;">
-                    Tu código de verificación
+                    ${content.otpLabel}
                   </p>
                   <!-- OTP Block -->
                   <div role="region" aria-label="Código de verificación de 6 dígitos" style="background-color:#4f46e5; border-radius:8px; padding:28px 40px; margin:0 auto 20px; max-width:460px;">
@@ -157,7 +197,7 @@ export async function sendOTPEmail({
                   </p>
                   <!-- Advertencia 2 -->
                   <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; color:#6b7280; line-height:1.7; margin:0 auto; max-width:420px;">
-                    Si no solicitaste la creación de una cuenta, puedes ignorar este mensaje de forma segura.
+                    ${content.ignoreMessage}
                   </p>
                   <!-- Divider -->
                   <div style="border-top:1px solid #e5e7eb; margin:32px 0;"></div>
