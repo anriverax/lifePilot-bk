@@ -1,8 +1,7 @@
 enum TypeGender {
   M
-  H
+  F
 }
-
 
 enum RoleType {
   ADMIN
