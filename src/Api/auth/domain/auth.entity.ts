@@ -1,6 +1,6 @@
 export enum Gender {
   M = "M",
-  H = "H"
+  F = "F"
 }
 
 export interface CreateUserInput {
@@ -12,6 +12,7 @@ export interface CreateUserInput {
   birthdate: Date;
   email: string;
   passwd: string;
+  confirmPassword: string;
 }
 
 export interface CreateUserWithCreator extends Omit<CreateUserInput, "email" | "passwd" | "roleId"> {

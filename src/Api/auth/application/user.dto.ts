@@ -3,7 +3,6 @@ import {
   IsDate,
   IsEmail,
   IsEnum,
-  IsIn,
   IsNotEmpty,
   IsString,
   Matches,
@@ -12,6 +11,7 @@ import {
 } from "class-validator";
 import { Gender } from "../domain/auth.entity";
 import { decryptTextTransformer } from "@/common/helpers/functions";
+import { MatchField } from "@/common/validators/match-field.validator";
 
 export class UserDto {
   @IsNotEmpty({ message: "El nombre es obligatorio." })
@@ -31,9 +31,8 @@ export class UserDto {
 
   @IsNotEmpty({ message: "El genero es obligatorio." })
   @IsString({ message: "El género debe ser una cadena de texto." })
-  @IsEnum(Gender, { message: "El género debe ser M o H." })
-  @IsIn(["M", "H"], { message: "El género debe ser 'M' o 'H'." })
-  gender: Gender = null as any;
+  @IsEnum(Gender, { message: "El género debe ser M o F." })
+  gender!: Gender;
 
   @IsNotEmpty({ message: "El teléfono es obligatorio." })
   @Transform(({ value }) => value.trim())
@@ -66,4 +65,16 @@ export class UserDto {
     message: "La contraseña debe contener al menos una mayúscula, una minúscula y un número."
   })
   passwd: string = "";
+
+  @IsNotEmpty({ message: "La confirmación de contraseña es un campo obligatorio." })
+  @Transform(({ value }) => decryptTextTransformer(value as string))
+  @IsString({ message: "La confirmación de contraseña debe ser una cadena de texto válida." })
+  @MinLength(8, { message: "La confirmación de contraseña debe tener al menos 8 caracteres." })
+  @MaxLength(12, { message: "La confirmación de contraseña no puede exceder 12 caracteres." })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+    message:
+      "La confirmación de contraseña debe contener al menos una mayúscula, una minúscula y un número."
+  })
+  @MatchField("passwd", { message: "Las contraseñas no coinciden." })
+  confirmPassword: string = "";
 }

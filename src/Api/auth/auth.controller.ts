@@ -17,10 +17,19 @@ import { RequestLoginOtpDto } from "./application/request-login-otp.dto";
 import { RequestLoginOtpCommand } from "./application/commands/request-login-otp/request-login-otp.command";
 import { LoginWithOtpDto } from "./application/login-with-otp.dto";
 import { LoginWithOtpCommand } from "./application/commands/login-with-otp/login-with-otp.command";
+import { LogoutCommand } from "./application/commands/logout/logout.command";
+import { PrismaService } from "@/services/prisma/prisma.service";
+
+type ProfileResponse = UserSession["user"] & {
+  roleName: string | null;
+};
 
 @Controller("/auth")
 export class AuthController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly prisma: PrismaService
+  ) {}
   @AllowAnonymous()
   @Post("register")
   async register(@Body() data: UserDto): Promise<boolean> {
@@ -88,10 +97,41 @@ export class AuthController {
     };
   }
 
+  @Post("logout")
+  async logout(@Request() req: ExpressRequest): Promise<{ message: string; data: boolean }> {
+    const logoutResponse = await this.commandBus.execute(new LogoutCommand(req.headers));
+
+    return {
+      message: "Sesión cerrada con éxito.",
+      data: logoutResponse
+    };
+  }
+
   @Get("profile")
-  getProfile(@Session() session: UserSession) {
-    // session.user  → datos del usuario autenticado
-    // session.session → datos de la sesión (expira, token, etc.)
-    return session.user;
+  async getProfile(@Session() session: UserSession): Promise<ProfileResponse> {
+    const userId = Number(session.user.id);
+
+    if (Number.isNaN(userId)) {
+      return {
+        ...session.user,
+        roleName: null
+      };
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        Roles: {
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+
+    return {
+      ...session.user,
+      roleName: user?.Roles.name ?? null
+    };
   }
 }

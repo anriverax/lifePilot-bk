@@ -35,7 +35,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }): ErrorResponsePayload {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
-
+    console.log(exceptionResponse);
     const errors =
       typeof exceptionResponse === "string"
         ? [exceptionResponse]
@@ -46,7 +46,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     return {
       statusCode: status,
       timestamp: new Date().toISOString(),
-      message: errors[0] ?? "Error inesperado",
+      message: "Error inesperado",
       data: null,
       errors
     };
