@@ -1,0 +1,71 @@
+model Role {
+  id              Int              @id @default(autoincrement())
+  name            RoleType         @unique // Ej: "ADMIN", "USER", "MANAGER"
+  description     String?
+  RolePermissions RolePermission[]
+  RoleMenus       RoleMenu[]
+  Users           User[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime?        @updatedAt
+}
+
+// Representa el módulo o recurso del sistema (ej: "USUARIOS", "REPORTES")
+model Resource {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique // Ej: "users", "billing", "settings"
+  permissions Permission[]
+  menuItems   MenuItem[]
+}
+
+// Permisos específicos por recurso (CRUD + Upload)
+model Permission {
+  id              Int              @id @default(autoincrement())
+  resourceId      Int
+  Resource        Resource         @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  action          ActionType // ENUM: READ, CREATE, UPDATE, DELETE, UPLOAD
+  RolePermissions RolePermission[]
+
+  @@unique([resourceId, action]) // Evita duplicados como "users:CREATE" dos veces
+}
+
+// Tabla intermedia explicita para la relación Muchos a Muchos entre Roles y Permisos
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  Role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  Permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId]) // Clave primaria compuesta, más óptimo que un ID autoincremental
+}
+
+// Estructura de Menú Multinivel (Árbol)
+model MenuItem {
+  id    Int     @id @default(autoincrement())
+  title String
+  path  String // Ej: "/dashboard/users"
+  icon  String?
+  order Float   @default(0) // Float es más flexible para ordenar que Int habitualmente
+
+  // Auto-relación para menús hijos (Submenús)
+  parentId Int?
+
+  // NUEVO: Vinculamos el menú al recurso que necesita para ser visto
+  resourceId Int? // Puede ser opcional si hay menús públicos (como un "Inicio")
+  Resource   Resource? @relation(fields: [resourceId], references: [id])
+
+  Parent   MenuItem?  @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  Children MenuItem[] @relation("MenuHierarchy")
+
+  // Relación con los Roles que pueden VER este menú
+  RoleMenus RoleMenu[]
+}
+
+// Tabla intermedia para controlar qué roles ven qué menús
+model RoleMenu {
+  roleId     Int
+  menuItemId Int
+  Role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  MenuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, menuItemId])
+}

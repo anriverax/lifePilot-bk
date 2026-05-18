@@ -31,7 +31,7 @@ export class RedisService {
    * @param ttl - Tiempo de vida en segundos (opcional).
    * @throws Relanza el error original si la operación falla en Redis.
    */
-  async set(key: string, value: string, ttl?: number): Promise<void> {
+  async set(key: string, value: unknown, ttl?: number): Promise<void> {
     const val = typeof value === "string" ? value : JSON.stringify(value);
     try {
       if (ttl) {
@@ -59,11 +59,15 @@ export class RedisService {
   async get<T = string>(key: string): Promise<T | null> {
     try {
       const value = await this.redis.get(key);
-      if (value) {
-        return typeof value === "string" ? (value as T) : (JSON.parse(value) as T);
+      if (value === null) {
+        return null;
       }
 
-      return null;
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return value as T;
+      }
     } catch (error) {
       this.logger.error(
         `❌ Se produjo un error al intentar obtener la clave "${key}" desde Redis.`,

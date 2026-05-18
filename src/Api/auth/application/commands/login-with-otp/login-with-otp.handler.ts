@@ -3,9 +3,12 @@ import { auth } from "@/lib/auth";
 import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { LoginWithOtpCommand } from "./login-with-otp.command";
+import { AuthorizationService } from "@/api/auth/services/authorization.service";
 
 @CommandHandler(LoginWithOtpCommand)
 export class LoginWithOtpHandler implements ICommandHandler<LoginWithOtpCommand> {
+  constructor(private readonly authorizationService: AuthorizationService) {}
+
   async execute(command: LoginWithOtpCommand): Promise<AuthResponse> {
     const { data } = command;
 
@@ -20,6 +23,8 @@ export class LoginWithOtpHandler implements ICommandHandler<LoginWithOtpCommand>
       const { user, ...others } = res;
       const typedUser = user as typeof user & { roleId: number };
       const { name, email, image, roleId, id } = typedUser;
+
+      await this.authorizationService.primeAuthorizationCache(id);
 
       return {
         ...others,

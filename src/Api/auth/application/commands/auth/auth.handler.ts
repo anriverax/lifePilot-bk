@@ -3,9 +3,12 @@ import { AuthCommand } from "./auth.command";
 import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { auth } from "@/lib/auth";
 import { AuthResponse } from "@/api/auth/domain/auth.entity";
+import { AuthorizationService } from "@/api/auth/services/authorization.service";
 
 @CommandHandler(AuthCommand)
 export class AuthHandler implements ICommandHandler<AuthCommand> {
+  constructor(private readonly authorizationService: AuthorizationService) {}
+
   async execute(command: AuthCommand): Promise<AuthResponse> {
     const { data } = command;
 
@@ -19,6 +22,8 @@ export class AuthHandler implements ICommandHandler<AuthCommand> {
 
       const { user, ...others } = res;
       const { name, email, image, roleId, id } = user;
+
+      await this.authorizationService.primeAuthorizationCache(id);
 
       return {
         ...others,

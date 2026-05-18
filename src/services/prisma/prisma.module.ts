@@ -1,5 +1,5 @@
 import { Module, Global } from "@nestjs/common";
-import { PrismaService } from "./prisma.service";
+import { createPrismaService, PrismaService } from "./prisma.service";
 
 /**
  * El módulo global para proporcionar y exportar el PrismaService.
@@ -12,8 +12,8 @@ import { PrismaService } from "./prisma.service";
       // El token que se usará para la inyección de dependencias.
       provide: PrismaService,
 
-      // La clase que se instanciará para el proveedor.
-      useClass: PrismaService
+      // Reutiliza el PrismaClient compartido como instancia inyectable.
+      useFactory: createPrismaService
     }
   ],
   /**

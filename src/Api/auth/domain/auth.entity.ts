@@ -1,3 +1,7 @@
+import { MenuItem } from "@/prisma/generated/client";
+import { ActionType, RoleType } from "@/prisma/generated/enums";
+import { UserSession } from "@thallesp/nestjs-better-auth";
+
 export enum Gender {
   M = "M",
   F = "F"
@@ -55,3 +59,48 @@ export interface AuthResponse {
     id: number | string;
   };
 }
+
+export interface RolByUserId {
+  roleId: number;
+  Roles: {
+    name: string;
+  };
+}
+
+export interface AuthorizationPermission {
+  resource: string;
+  action: ActionType;
+}
+
+export type AuthorizationMenuItem = MenuItem & { Children: AuthorizationMenuItem[] };
+
+export interface AuthorizationSnapshot {
+  roleId: number;
+  roleName: RoleType | null;
+  permissions: AuthorizationPermission[];
+  menu: AuthorizationMenuItem[];
+}
+
+export type FlatMenuItem = Omit<AuthorizationMenuItem, "Children">;
+
+export interface AuthorizationCachePayload {
+  roleId: number;
+  roleName: RoleType | null;
+  permissions: AuthorizationPermission[];
+  menu: FlatMenuItem[];
+}
+
+export interface AuthorizationSnapshotOptions {
+  forceRefresh?: boolean;
+}
+
+export interface BootstrapResponse {
+  user: UserSession["user"];
+  roleName: RoleType | null;
+  permissions: AuthorizationPermission[];
+  menu: AuthorizationMenuItem[];
+}
+
+export type ProfileResponse = UserSession["user"] & {
+  roleName: string | null;
+};

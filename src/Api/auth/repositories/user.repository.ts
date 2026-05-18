@@ -1,6 +1,7 @@
 import { PrismaService } from "@/services/prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
 import { AuthUser } from "../domain/user.entity";
+import { RolByUserId } from "../domain/auth.entity";
 
 @Injectable()
 export class UserRepository {
@@ -22,5 +23,36 @@ export class UserRepository {
     });
 
     return user;
+  }
+
+  async findRolByUserId(userId: number): Promise<RolByUserId | null> {
+    const userWithRoles = await this.prisma.user.findUnique({
+      where: {
+        id: userId
+      },
+      select: {
+        roleId: true,
+        Roles: {
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+
+    return userWithRoles;
+  }
+
+  async getAllUserIdByRoleId(roleId: number): Promise<{ id: number }[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        roleId
+      },
+      select: {
+        id: true
+      }
+    });
+
+    return users;
   }
 }

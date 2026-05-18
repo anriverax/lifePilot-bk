@@ -18,6 +18,7 @@ import { ThrottlerGuard } from "@nestjs/throttler";
 import { SuccessResponseInterceptor } from "./common/interceptors/success-response.interceptor";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { ErrorHandlingModule } from "./services/errorHandling/errorHandling.module";
+import { PermissionGuard } from "./common/authorization/permission.guard";
 
 @Module({
   imports: [
@@ -51,6 +52,10 @@ import { ErrorHandlingModule } from "./services/errorHandling/errorHandling.modu
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard
     },
     {
       provide: APP_FILTER,

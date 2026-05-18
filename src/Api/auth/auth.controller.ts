@@ -12,23 +12,19 @@ import { DecryptBodyInterceptor } from "@/common/interceptors/decrypt-body.inter
 import { AuthCommand } from "./application/commands/auth/auth.command";
 import { ChangePasswordCommand } from "./application/commands/change-password/change-password.command";
 import { ChangePasswordDto } from "./application/change-password.dto";
-import { AuthResponse } from "./domain/auth.entity";
+import { AuthResponse, BootstrapResponse, ProfileResponse } from "./domain/auth.entity";
 import { RequestLoginOtpDto } from "./application/request-login-otp.dto";
 import { RequestLoginOtpCommand } from "./application/commands/request-login-otp/request-login-otp.command";
 import { LoginWithOtpDto } from "./application/login-with-otp.dto";
 import { LoginWithOtpCommand } from "./application/commands/login-with-otp/login-with-otp.command";
 import { LogoutCommand } from "./application/commands/logout/logout.command";
-import { PrismaService } from "@/services/prisma/prisma.service";
-
-type ProfileResponse = UserSession["user"] & {
-  roleName: string | null;
-};
+import { AuthorizationService } from "@/api/auth/services/authorization.service";
 
 @Controller("/auth")
 export class AuthController {
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly prisma: PrismaService
+    private readonly authorizationService: AuthorizationService
   ) {}
   @AllowAnonymous()
   @Post("register")
@@ -109,29 +105,23 @@ export class AuthController {
 
   @Get("profile")
   async getProfile(@Session() session: UserSession): Promise<ProfileResponse> {
-    const userId = Number(session.user.id);
-
-    if (Number.isNaN(userId)) {
-      return {
-        ...session.user,
-        roleName: null
-      };
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        Roles: {
-          select: {
-            name: true
-          }
-        }
-      }
-    });
+    const snapshot = await this.authorizationService.getAuthorizationSnapshot(session.user.id);
 
     return {
       ...session.user,
-      roleName: user?.Roles.name ?? null
+      roleName: snapshot.roleName
+    };
+  }
+
+  @Get("bootstrap")
+  async getBootstrap(@Session() session: UserSession): Promise<BootstrapResponse> {
+    const snapshot = await this.authorizationService.getAuthorizationSnapshot(session.user.id);
+
+    return {
+      user: session.user,
+      roleName: snapshot.roleName,
+      permissions: snapshot.permissions,
+      menu: snapshot.menu
     };
   }
 }

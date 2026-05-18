@@ -46,7 +46,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     return {
       statusCode: status,
       timestamp: new Date().toISOString(),
-      message: "Error inesperado",
+      message: "No se pudo procesar la solicitud",
       data: null,
       errors
     };

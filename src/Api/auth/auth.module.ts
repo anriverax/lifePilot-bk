@@ -10,6 +10,8 @@ import { ChangePasswordHandler } from "./application/commands/change-password/ch
 import { RequestLoginOtpHandler } from "./application/commands/request-login-otp/request-login-otp.handler";
 import { LoginWithOtpHandler } from "./application/commands/login-with-otp/login-with-otp.handler";
 import { LogoutHandler } from "./application/commands/logout/logout.handler";
+import { AuthorizationService } from "./services/authorization.service";
+import { RolPermissionRepository } from "./repositories/rolPermission.repository";
 
 const AuthCommand = [
   CreateUserHandler,
@@ -21,7 +23,7 @@ const AuthCommand = [
   LogoutHandler
 ];
 
-const AuthReposity = [UserRepository, AuthRepository];
+const AuthReposity = [UserRepository, AuthRepository, RolPermissionRepository];
 // Módulo de NestJS para autenticación.
 @Module({
   // Importa los módulos necesarios para la autenticación, como JwtModule.
@@ -29,6 +31,7 @@ const AuthReposity = [UserRepository, AuthRepository];
   // Controladores que manejan solicitudes HTTP relacionadas con la autenticación.
   controllers: [AuthController],
   // Proveedores para servicios y guardas utilizados en el módulo de autenticación.
-  providers: [...AuthReposity, ...AuthCommand]
+  providers: [...AuthReposity, ...AuthCommand, AuthorizationService],
+  exports: [AuthorizationService]
 })
 export class AuthModule {}

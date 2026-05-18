@@ -8,3 +8,11 @@ enum RoleType {
   USER
   USER_DEMO
 }
+
+enum ActionType {
+  READ
+  CREATE
+  UPDATE
+  DELETE
+  UPLOAD
+}
