@@ -19,6 +19,7 @@ import { LoginWithOtpDto } from "./application/login-with-otp.dto";
 import { LoginWithOtpCommand } from "./application/commands/login-with-otp/login-with-otp.command";
 import { LogoutCommand } from "./application/commands/logout/logout.command";
 import { AuthorizationService } from "@/api/auth/services/authorization.service";
+import { ResendCodeDto } from './application/resend-code.dto';
 
 @Controller("/auth")
 export class AuthController {
@@ -74,6 +75,18 @@ export class AuthController {
     return {
       message: "Inicio de sesión con código realizado con éxito.",
       data: authResponse
+    };
+  }
+
+  @AllowAnonymous()
+  @Throttle({ default: { limit: 2, ttl: 86400000 } })
+  @Post("resend-code")
+  async resendCode(@Body() data: ResendCodeDto): Promise<{ message: string; data: boolean }> {
+    const requestResult = await this.commandBus.execute(new RequestLoginOtpCommand(data));
+
+    return {
+      message: "Si el correo existe, se ha reenviado un código de acceso.",
+      data: requestResult
     };
   }
 

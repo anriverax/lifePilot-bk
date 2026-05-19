@@ -96,7 +96,7 @@ Emails are delivered via [Resend](https://resend.com).
    - `POST /api/auth/email-otp/verify-email` — submit the OTP to activate the account
 
 #### Sign-in with OTP second factor
-1. `POST /api/auth/email-otp/send-verification-otp` `{ email, type: "sign-in" }` — request OTP (6 digits, 10-min expiry)
+1. `POST /api/auth/email-otp/send-verification-otp` `{ email, type: "sign-in" }` — request OTP (6 digits, 5-min expiry)
 2. `POST /api/auth/email-otp/sign-in` `{ email, otp }` — complete sign-in
 
 #### Password reset

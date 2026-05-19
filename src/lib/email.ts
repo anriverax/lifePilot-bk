@@ -188,7 +188,7 @@ export async function sendOTPEmail({
                   <!-- Expiry Badge -->
                   <div style="margin-bottom:20px;">
                     <span style="display:inline-block; background-color:#fef3c7; border:1px solid #fcd34d; border-radius:20px; padding:6px 16px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:12.5px; color:#92400e; font-weight:500;">
-                      &#x23F1;&nbsp;&nbsp;Expira en 10 minutos
+                      &#x23F1;&nbsp;&nbsp;Expira en 5 minutos
                     </span>
                   </div>
                   <!-- Advertencia 1 -->

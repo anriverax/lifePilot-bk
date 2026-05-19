@@ -121,7 +121,7 @@ export const auth = betterAuth({
      */
     emailOTP({
       otpLength: 6,
-      expiresIn: 600, // 10 minutes
+      expiresIn: 300, // 5 minutes
       allowedAttempts: 3,
       disableSignUp: true,
       storeOTP: "hashed",
