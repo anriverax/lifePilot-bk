@@ -37,7 +37,11 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
         createdBy: SYSTEM_USER_ID
       });
 
-      return result ? true : false;
+      if (!result) {
+        throw new InternalServerErrorException("No se pudo persistir la cuenta creada");
+      }
+
+      return true;
     } catch (error: unknown) {
       const msg = String((error as any)?.message ?? "").toLowerCase();
       // Mapeo común para email duplicado

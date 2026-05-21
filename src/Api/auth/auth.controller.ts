@@ -19,7 +19,9 @@ import { LoginWithOtpDto } from "./application/login-with-otp.dto";
 import { LoginWithOtpCommand } from "./application/commands/login-with-otp/login-with-otp.command";
 import { LogoutCommand } from "./application/commands/logout/logout.command";
 import { AuthorizationService } from "@/api/auth/services/authorization.service";
-import { ResendCodeDto } from './application/resend-code.dto';
+import { ResendCodeDto } from "./application/resend-code.dto";
+import { ResendCodeCommand } from "./application/commands/resend-code/resend-code.command";
+import { NestResponse } from "@/common/helpers/types";
 
 @Controller("/auth")
 export class AuthController {
@@ -29,23 +31,20 @@ export class AuthController {
   ) {}
   @AllowAnonymous()
   @Post("register")
-  async register(@Body() data: UserDto): Promise<boolean> {
-    const userId = await this.commandBus.execute(new CreateUserCommand(data));
+  async register(@Body() data: UserDto): Promise<NestResponse<boolean>> {
+    const registerResult = await this.commandBus.execute(new CreateUserCommand(data));
 
-    return userId;
-  }
-
-  @AllowAnonymous()
-  @Post("verify-email")
-  async verifyEmail(@Body() data: VerifyEmailDto): Promise<boolean> {
-    return await this.commandBus.execute(new VerifyEmailCommand(data));
+    return {
+      message: "Cuenta creada con éxito. Revisa tu correo para verificarla.",
+      data: registerResult
+    };
   }
 
   @AllowAnonymous()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @UseInterceptors(DecryptBodyInterceptor)
   @Post("login")
-  async login(@Body() data: AuthDto): Promise<{ message: string; data: AuthResponse }> {
+  async login(@Body() data: AuthDto): Promise<NestResponse<AuthResponse>> {
     const authResponse = await this.commandBus.execute(new AuthCommand(data));
 
     return {
@@ -57,7 +56,7 @@ export class AuthController {
   @AllowAnonymous()
   @Throttle({ default: { limit: 3, ttl: 600000 } })
   @Post("login-otp/request")
-  async requestLoginOtp(@Body() data: RequestLoginOtpDto): Promise<{ message: string; data: boolean }> {
+  async requestLoginOtp(@Body() data: RequestLoginOtpDto): Promise<NestResponse<boolean>> {
     const requestResult = await this.commandBus.execute(new RequestLoginOtpCommand(data));
 
     return {
@@ -67,9 +66,9 @@ export class AuthController {
   }
 
   @AllowAnonymous()
-  @Throttle({ default: { limit: 5, ttl: 600000 } })
+  @Throttle({ default: { limit: 3, ttl: 600000 } })
   @Post("login-otp/verify")
-  async loginWithOtp(@Body() data: LoginWithOtpDto): Promise<{ message: string; data: AuthResponse }> {
+  async loginWithOtp(@Body() data: LoginWithOtpDto): Promise<NestResponse<AuthResponse>> {
     const authResponse = await this.commandBus.execute(new LoginWithOtpCommand(data));
 
     return {
@@ -79,14 +78,26 @@ export class AuthController {
   }
 
   @AllowAnonymous()
-  @Throttle({ default: { limit: 2, ttl: 86400000 } })
-  @Post("resend-code")
-  async resendCode(@Body() data: ResendCodeDto): Promise<{ message: string; data: boolean }> {
-    const requestResult = await this.commandBus.execute(new RequestLoginOtpCommand(data));
+  @Throttle({ default: { limit: 3, ttl: 86400000 } })
+  @Post("verify-email")
+  async verifyEmail(@Body() data: VerifyEmailDto): Promise<NestResponse<boolean>> {
+    const verifyEmailResult = await this.commandBus.execute(new VerifyEmailCommand(data));
 
     return {
-      message: "Si el correo existe, se ha reenviado un código de acceso.",
-      data: requestResult
+      message: "Correo verificado con éxito.",
+      data: verifyEmailResult
+    };
+  }
+
+  @AllowAnonymous()
+  @Throttle({ default: { limit: 3, ttl: 86400000 } })
+  @Post("resend-code")
+  async resendCode(@Body() data: ResendCodeDto): Promise<NestResponse<boolean>> {
+    const resendCodeResult = await this.commandBus.execute(new ResendCodeCommand(data));
+
+    return {
+      message: "Si el correo existe, se ha reenviado un código de verificación.",
+      data: resendCodeResult
     };
   }
 
@@ -95,7 +106,7 @@ export class AuthController {
   async changePassword(
     @Request() req: ExpressRequest,
     @Body() data: ChangePasswordDto
-  ): Promise<{ message: string; data: boolean }> {
+  ): Promise<NestResponse<boolean>> {
     const changePasswordResponse = await this.commandBus.execute(
       new ChangePasswordCommand(data, req.headers)
     );
@@ -107,7 +118,7 @@ export class AuthController {
   }
 
   @Post("logout")
-  async logout(@Request() req: ExpressRequest): Promise<{ message: string; data: boolean }> {
+  async logout(@Request() req: ExpressRequest): Promise<NestResponse<boolean>> {
     const logoutResponse = await this.commandBus.execute(new LogoutCommand(req.headers));
 
     return {
@@ -117,24 +128,30 @@ export class AuthController {
   }
 
   @Get("profile")
-  async getProfile(@Session() session: UserSession): Promise<ProfileResponse> {
+  async getProfile(@Session() session: UserSession): Promise<NestResponse<ProfileResponse>> {
     const snapshot = await this.authorizationService.getAuthorizationSnapshot(session.user.id);
 
     return {
-      ...session.user,
-      roleName: snapshot.roleName
+      message: "Perfil obtenido con éxito.",
+      data: {
+        ...session.user,
+        roleName: snapshot.roleName
+      }
     };
   }
 
   @Get("bootstrap")
-  async getBootstrap(@Session() session: UserSession): Promise<BootstrapResponse> {
+  async getBootstrap(@Session() session: UserSession): Promise<NestResponse<BootstrapResponse>> {
     const snapshot = await this.authorizationService.getAuthorizationSnapshot(session.user.id);
 
     return {
-      user: session.user,
-      roleName: snapshot.roleName,
-      permissions: snapshot.permissions,
-      menu: snapshot.menu
+      message: "Datos iniciales obtenidos con éxito.",
+      data: {
+        user: session.user,
+        roleName: snapshot.roleName,
+        permissions: snapshot.permissions,
+        menu: snapshot.menu
+      }
     };
   }
 }

@@ -24,7 +24,7 @@ export class ChangePasswordHandler implements ICommandHandler<ChangePasswordComm
         return true;
       }
 
-      return false;
+      throw new InternalServerErrorException("No se pudo cambiar la contraseña");
     } catch (error) {
       const msg = String((error as any)?.message ?? "").toLowerCase();
 

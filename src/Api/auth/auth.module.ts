@@ -10,6 +10,7 @@ import { ChangePasswordHandler } from "./application/commands/change-password/ch
 import { RequestLoginOtpHandler } from "./application/commands/request-login-otp/request-login-otp.handler";
 import { LoginWithOtpHandler } from "./application/commands/login-with-otp/login-with-otp.handler";
 import { LogoutHandler } from "./application/commands/logout/logout.handler";
+import { ResendCodeHandler } from "./application/commands/resend-code/resend-code.handler";
 import { AuthorizationService } from "./services/authorization.service";
 import { RolPermissionRepository } from "./repositories/rolPermission.repository";
 
@@ -20,7 +21,8 @@ const AuthCommand = [
   ChangePasswordHandler,
   RequestLoginOtpHandler,
   LoginWithOtpHandler,
-  LogoutHandler
+  LogoutHandler,
+  ResendCodeHandler
 ];
 
 const AuthReposity = [UserRepository, AuthRepository, RolPermissionRepository];

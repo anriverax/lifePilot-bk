@@ -13,7 +13,7 @@ export class SuccessResponseInterceptor implements NestInterceptor {
       map((data: unknown) => {
         if (this.isAlreadyWrapped(data)) {
           const wrappedData = data as {
-            statusCode: number;
+            statusCode?: number;
             message: string | string[];
             data?: unknown;
             errors?: string[];
@@ -62,6 +62,6 @@ export class SuccessResponseInterceptor implements NestInterceptor {
     }
 
     const candidate = data as Record<string, unknown>;
-    return "message" in candidate && ("statusCode" in candidate || "data" in candidate);
+    return "message" in candidate;
   }
 }

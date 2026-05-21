@@ -23,7 +23,7 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
         return true;
       }
 
-      return false;
+      throw new InternalServerErrorException("No se pudo verificar el correo");
     } catch (error) {
       const msg = String((error as any)?.message ?? "").toLowerCase();
 

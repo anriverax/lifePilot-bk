@@ -12,7 +12,11 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
         headers: fromNodeHeaders(command.headers)
       });
 
-      return Boolean(response);
+      if (!response) {
+        throw new InternalServerErrorException("No se pudo cerrar la sesión");
+      }
+
+      return true;
     } catch (error: unknown) {
       const msg = String((error as any)?.message ?? "").toLowerCase();
 

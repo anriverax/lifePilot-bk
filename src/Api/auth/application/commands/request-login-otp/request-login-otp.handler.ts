@@ -16,7 +16,11 @@ export class RequestLoginOtpHandler implements ICommandHandler<RequestLoginOtpCo
         }
       });
 
-      return response.success;
+      if (!response.success) {
+        throw new InternalServerErrorException("No se pudo generar el código de inicio de sesión");
+      }
+
+      return true;
     } catch (error) {
       const msg = String((error as any)?.message ?? "").toLowerCase();
 
