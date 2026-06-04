@@ -16,3 +16,15 @@ enum ActionType {
   DELETE
   UPLOAD
 }
+
+enum EventType {
+  MEDICAMENTO
+  CITA_MEDICA
+  HITO
+}
+
+enum Priority {
+  BAJA
+  MEDIA
+  ALTA
+}

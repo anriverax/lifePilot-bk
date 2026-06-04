@@ -20,3 +20,12 @@ model District {
   municipalityId Int
   Municipality   Municipality @relation(fields: [municipalityId], references: [id])
 }
+
+model Location {
+  id        Int     @id @default(autoincrement())
+  name      String
+  address   String
+  latitude  Float
+  longitude Float
+  Event     Event[]
+}

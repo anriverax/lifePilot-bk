@@ -27,7 +27,7 @@ model Person {
   updatedBy Int?
   deletedBy Int?
 
-  User       User      @relation(fields: [userId], references: [id])
+  User User @relation(fields: [userId], references: [id])
 
   @@index([firstName, lastName, userId])
 }
@@ -100,4 +100,21 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
+}
+
+model Event {
+  id               Int       @id @default(autoincrement())
+  title            String
+  eventDateAndTime DateTime
+  isReminder       Boolean   @default(false)
+  eventType        EventType
+  priority         Priority
+  locationId       Int
+  Location         Location  @relation(fields: [locationId], references: [id])
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  createdBy        Int
+  updatedBy        Int?
+  deletedBy        Int?
 }
