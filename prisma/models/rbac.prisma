@@ -40,12 +40,12 @@ model RolePermission {
 
 // Estructura de Menú Multinivel (Árbol)
 model MenuItem {
-  id    Int     @id @default(autoincrement())
-  title String
-  path  String // Ej: "/dashboard/users"
-  icon  String?
-  order Float   @default(0) // Float es más flexible para ordenar que Int habitualmente
-
+  id       Int     @id @default(autoincrement())
+  title    String
+  path     String // Ej: "/dashboard/users"
+  icon     String?
+  order    Float   @default(0) // Float es más flexible para ordenar que Int habitualmente
+  sub      String? // Subtítulo o descripción corta del menú
   // Auto-relación para menús hijos (Submenús)
   parentId Int?
 

@@ -8,6 +8,7 @@ type MenuSeedItem = {
   icon: string;
   order: number;
   parentKey?: string;
+  sub?: string;
 };
 
 type RoleMenuSeedConfig = {
@@ -20,6 +21,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Calendario",
     path: "/calendario",
     icon: "CalendarDays",
+    sub: "Calendario & Recordatorios",
     order: 1
   },
   {
@@ -34,6 +36,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Despensa",
     path: "/alimentacion/despensa",
     icon: "ChefHat",
+    sub: "Despensa Inteligente",
     order: 2.1,
     parentKey: "food"
   },
@@ -42,6 +45,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Comidas",
     path: "/alimentacion/comidas",
     icon: "UtensilsCrossed",
+    sub: "Comidas & Supermercado",
     order: 2.2,
     parentKey: "food"
   },
@@ -50,6 +54,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Supermercado",
     path: "/alimentacion/supermercado",
     icon: "ShoppingCart",
+    sub: "Supermercado",
     order: 2.3,
     parentKey: "food"
   },
@@ -65,6 +70,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Rutinas",
     path: "/estilo-de-vida/rutinas",
     icon: "Dumbbell",
+    sub: "Actividad y rendimiento",
     order: 3.1,
     parentKey: "lifestyle"
   },
@@ -73,6 +79,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Hábitos",
     path: "/estilo-de-vida/habitos",
     icon: "Smile",
+    sub: "Hábitos & Ánimo",
     order: 3.2,
     parentKey: "lifestyle"
   },
@@ -81,6 +88,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Progreso",
     path: "/estilo-de-vida/progreso",
     icon: "LineChart",
+    sub: "Progreso & Análisis",
     order: 3.3,
     parentKey: "lifestyle"
   },
@@ -89,6 +97,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Documentos",
     path: "/documentos",
     icon: "FolderHeart",
+    sub: "Documentos & Especialistas",
     order: 4
   },
   {
@@ -96,6 +105,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Ajustes",
     path: "/ajustes",
     icon: "Settings",
+    sub: "Ajustes & Perfil de salud",
     order: 5
   },
   {
@@ -103,6 +113,7 @@ const MENU_ITEMS: MenuSeedItem[] = [
     title: "Notificaciones",
     path: "/notificaciones",
     icon: "Bell",
+    sub: "Centro de notificaciones",
     order: 6
   }
 ];

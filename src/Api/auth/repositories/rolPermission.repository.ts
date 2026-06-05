@@ -61,6 +61,7 @@ export class RolPermissionRepository {
           title: true,
           path: true,
           icon: true,
+          sub: true,
           order: true,
           parentId: true,
           resourceId: true

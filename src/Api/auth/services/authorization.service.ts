@@ -102,6 +102,7 @@ export class AuthorizationService {
     const roleName = user.Roles.name ?? null;
 
     const rolePermissionsData = await this.rolePermissionRepository.findPermissionsByRoleId(roleId);
+
     const { rolePermissions, menu } = rolePermissionsData;
 
     const permissions = rolePermissions.map(({ Permission }) => ({
