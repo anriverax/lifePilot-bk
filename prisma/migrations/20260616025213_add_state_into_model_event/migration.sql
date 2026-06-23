@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "State" AS ENUM ('NO_INICIADO', 'COMPLETADO', 'CANCELADO');
+
+-- AlterTable
+ALTER TABLE "Event" ADD COLUMN     "state" "State" NOT NULL DEFAULT 'NO_INICIADO';

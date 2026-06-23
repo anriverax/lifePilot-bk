@@ -14,7 +14,7 @@ export class AuthRepository {
       data: {
         firstName: data.firstName,
         lastName: data.lastName,
-        address: data.address,
+        countryCode: data.countryCode,
         gender: data.gender as Gender,
         phoneNumber: data.phoneNumber,
         birthdate: data.birthdate,

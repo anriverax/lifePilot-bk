@@ -57,11 +57,10 @@ export class SuccessResponseInterceptor implements NestInterceptor {
   }
 
   private isAlreadyWrapped(data: unknown): boolean {
-    if (!data || typeof data !== "object") {
-      return false;
-    }
-
+    if (!data || typeof data !== "object") return false;
     const candidate = data as Record<string, unknown>;
-    return "message" in candidate;
+    return (
+      "message" in candidate && typeof candidate.message === "string" && "data" in candidate // tu propio patrón siempre incluye `data`, una entidad de dominio rara vez tendría ambos
+    );
   }
 }

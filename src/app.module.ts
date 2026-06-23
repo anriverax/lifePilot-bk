@@ -19,6 +19,7 @@ import { SuccessResponseInterceptor } from "./common/interceptors/success-respon
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { ErrorHandlingModule } from "./services/errorHandling/errorHandling.module";
 import { PermissionGuard } from "./common/authorization/permission.guard";
+import { EventModule } from "./api/event/event.module";
 
 @Module({
   imports: [
@@ -45,7 +46,8 @@ import { PermissionGuard } from "./common/authorization/permission.guard";
     PrismaModule,
     RedisModule.forRoot(),
     HealthModule,
-    AuthModule
+    AuthModule,
+    EventModule
   ],
   controllers: [],
   providers: [

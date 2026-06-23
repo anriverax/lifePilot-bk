@@ -1,13 +1,16 @@
 import { AuthResponse } from "@/api/auth/domain/auth.entity";
 import { auth } from "@/lib/auth";
-import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { LoginWithOtpCommand } from "./login-with-otp.command";
 import { AuthorizationService } from "@/api/auth/services/authorization.service";
+import { ErrorHandlingService } from "@/services/errorHandling/error-handling.service";
 
 @CommandHandler(LoginWithOtpCommand)
 export class LoginWithOtpHandler implements ICommandHandler<LoginWithOtpCommand> {
-  constructor(private readonly authorizationService: AuthorizationService) {}
+  constructor(
+    private readonly authorizationService: AuthorizationService,
+    private readonly errorHandlingService: ErrorHandlingService
+  ) {}
 
   async execute(command: LoginWithOtpCommand): Promise<AuthResponse> {
     const { data } = command;
@@ -37,24 +40,8 @@ export class LoginWithOtpHandler implements ICommandHandler<LoginWithOtpCommand>
           id
         }
       };
-    } catch (error) {
-      const msg = String((error as any)?.message ?? "").toLowerCase();
-
-      if (msg.includes("invalid otp") || msg.includes("invalid code")) {
-        throw new BadRequestException("El código OTP es inválido");
-      }
-
-      if (msg.includes("expired")) {
-        throw new BadRequestException("El código OTP ha expirado");
-      }
-
-      if (msg.includes("attempt") || msg.includes("too many")) {
-        throw new BadRequestException("Se agotaron los intentos para validar el código");
-      }
-
-      if ((error as any)?.status && (error as any)?.response) throw error;
-
-      throw new InternalServerErrorException("No se pudo iniciar sesión con el código");
+    } catch (error: unknown) {
+      this.errorHandlingService.handleBetterAuthError("LoginWithOtpHandler.execute", error);
     }
   }
 }

@@ -24,12 +24,12 @@ export class UserDto {
   @IsString({ message: "El primer apellido debe ser una cadena de texto." })
   lastName: string = "";
 
-  @IsNotEmpty({ message: "La dirección es obligatoria." })
-  @Transform(({ value }) => value.trim())
-  @IsString({ message: "La dirección debe ser una cadena de texto." })
-  address: string = "";
+  @IsNotEmpty({ message: "El código del país es obligatorio." })
+  @Transform(({ value }) => value.trim().toUpperCase())
+  @IsString({ message: "El código del país debe ser una cadena de texto." })
+  countryCode: string = "";
 
-  @IsNotEmpty({ message: "El genero es obligatorio." })
+  @IsNotEmpty({ message: "El género es obligatorio." })
   @IsString({ message: "El género debe ser una cadena de texto." })
   @IsEnum(Gender, { message: "El género debe ser M o F." })
   gender!: Gender;
@@ -37,7 +37,7 @@ export class UserDto {
   @IsNotEmpty({ message: "El teléfono es obligatorio." })
   @Transform(({ value }) => value.trim())
   @IsString({ message: "El teléfono debe ser una cadena de texto." })
-  @Matches(/^(2|6|7)\d{3}-\d{4}$/)
+  @Matches(/^(2|6|7)\d{3}-\d{4}$/, { message: "El teléfono debe tener el formato 2000-0000." })
   phoneNumber: string = "";
 
   @IsNotEmpty({ message: "La fecha de nacimiento es obligatoria." })
@@ -48,11 +48,8 @@ export class UserDto {
   // The user's e-mail address.
   @IsNotEmpty({ message: "El correo electrónico es un campo obligatorio." })
   @Transform(({ value }) => value.toLowerCase().trim())
-  @IsString({ message: "La correo electrónico debe ser una cadena de texto." })
-  @IsEmail()
-  @Matches(
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  )
+  @IsString({ message: "El correo electrónico debe ser una cadena de texto." })
+  @IsEmail({}, { message: "El correo electrónico no tiene un formato válido." })
   email: string = "";
 
   // The user's password.

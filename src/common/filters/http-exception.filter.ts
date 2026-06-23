@@ -1,22 +1,23 @@
-import { ArgumentsHost, Catch, ExceptionFilter, Injectable } from "@nestjs/common";
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from "@nestjs/common";
 import { Request, Response } from "express";
 import { ErrorHandlingService } from "../../services/errorHandling/error-handling.service";
 
-type ErrorResponsePayload = {
+interface ErrorResponsePayload {
   statusCode: number;
   timestamp: string;
   message: string;
   data: null;
   errors: string[];
-};
+}
+
+type NestExceptionResponse = string | { message?: string | string[]; error?: string };
 
 @Catch()
-@Injectable()
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/explicit-function-return-type */
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
   constructor(private readonly errorHandlingService: ErrorHandlingService) {}
 
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -26,7 +27,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       exception
     );
 
-    response.status(httpException.getStatus()).json(this.buildErrorResponse(httpException));
+    const payload = this.buildErrorResponse(httpException);
+
+    this.logException(httpException, request);
+
+    response.status(httpException.getStatus()).json(payload);
   }
 
   private buildErrorResponse(exception: {
@@ -35,13 +40,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }): ErrorResponsePayload {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
-    console.log(exceptionResponse);
-    const errors =
-      typeof exceptionResponse === "string"
-        ? [exceptionResponse]
-        : Array.isArray(exceptionResponse.message)
-          ? exceptionResponse.message
-          : [exceptionResponse.message ?? "Error inesperado"];
+
+    const errors = this.extractErrors(exceptionResponse);
 
     return {
       statusCode: status,
@@ -50,5 +50,29 @@ export class HttpExceptionFilter implements ExceptionFilter {
       data: null,
       errors
     };
+  }
+
+  private extractErrors(exceptionResponse: NestExceptionResponse): string[] {
+    if (typeof exceptionResponse === "string") {
+      return [exceptionResponse];
+    }
+
+    if (Array.isArray(exceptionResponse.message)) {
+      return exceptionResponse.message;
+    }
+
+    return [exceptionResponse.message ?? "Error inesperado"];
+  }
+
+  private logException(exception: HttpException, request: Request): void {
+    const status = exception.getStatus();
+    const context = `${request.method} ${request.url}`;
+
+    // ✅ 5xx → error real (requiere atención); 4xx → warning (cliente, no urgente)
+    if (status >= 500) {
+      this.logger.error(`[${status}] ${context}`, exception.stack);
+    } else {
+      this.logger.warn(`[${status}] ${context} — ${exception.message}`);
+    }
   }
 }

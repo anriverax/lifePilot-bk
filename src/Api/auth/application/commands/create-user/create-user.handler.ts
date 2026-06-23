@@ -16,48 +16,49 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     const { data } = command;
     const { email, passwd, ...rest } = data;
 
-    try {
-      await auth.api.signUpEmail({
-        body: {
-          name: `${rest.firstName} ${rest.lastName}`.trim(),
-          email,
-          password: passwd
-        }
-      });
-
-      const isExistUser = await this.userRepository.findByIdOrEmail(undefined, email);
-
-      if (!isExistUser) {
-        throw new InternalServerErrorException("No se encontró el usuario creado por Better Auth");
-      }
-
-      const result = await this.authRepository.create({
-        ...rest,
-        userId: isExistUser.id,
-        createdBy: SYSTEM_USER_ID
-      });
-
-      if (!result) {
-        throw new InternalServerErrorException("No se pudo persistir la cuenta creada");
-      }
-
-      return true;
-    } catch (error: unknown) {
-      const msg = String((error as any)?.message ?? "").toLowerCase();
-      // Mapeo común para email duplicado
-      if (
-        msg.includes("already exists") ||
-        msg.includes("already in use") ||
-        msg.includes("duplicate") ||
-        msg.includes("unique")
-      ) {
-        throw new ConflictException("El correo ya está registrado");
-      }
-
-      // Si ya es una excepción HTTP de Nest, relanzar
-      if ((error as any)?.status && (error as any)?.response) throw error;
-
-      throw new InternalServerErrorException("No se pudo crear la cuenta");
+    const existing = await this.userRepository.findByIdOrEmail(undefined, email);
+    if (existing) {
+      throw new ConflictException("El correo ya está registrado");
     }
+
+    await auth.api.signUpEmail({
+      body: {
+        name: `${rest.firstName} ${rest.lastName}`.trim(),
+        email,
+        password: passwd
+      }
+    });
+
+    const createdUser = await this.resolveCreatedUser(email);
+
+    const result = await this.authRepository.create({
+      ...rest,
+      userId: createdUser.id,
+      createdBy: SYSTEM_USER_ID
+    });
+
+    if (!result) {
+      // Aquí sí deberías compensar: eliminar el usuario de Better Auth
+      // await this.rollbackBetterAuthUser(email);
+      throw new InternalServerErrorException("No se pudo persistir la cuenta creada");
+    }
+
+    return true;
+  }
+
+  private async resolveCreatedUser(email: string, attempts = 3, delayMs = 150) {
+    for (let i = 0; i < attempts; i++) {
+      const user = await this.userRepository.findByIdOrEmail(undefined, email);
+      if (user) return user;
+      if (i < attempts - 1) await this.delay(delayMs);
+    }
+
+    throw new InternalServerErrorException(
+      "No se encontró el usuario tras el registro en el proveedor de autenticación"
+    );
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

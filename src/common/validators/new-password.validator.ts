@@ -6,32 +6,49 @@ import {
   ValidatorConstraintInterface
 } from "class-validator";
 
-const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s])\S+$/;
+interface PasswordRule {
+  isValid: (value: string) => boolean;
+  message: string;
+}
+
+const MIN_LENGTH = 8;
+const MAX_LENGTH = 12;
+const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
+
+const PASSWORD_RULES: PasswordRule[] = [
+  {
+    isValid: (v) => v.length >= MIN_LENGTH,
+    message: `La nueva contraseña debe tener al menos ${MIN_LENGTH} caracteres.`
+  },
+  {
+    isValid: (v) => v.length <= MAX_LENGTH,
+    message: `La nueva contraseña no puede exceder ${MAX_LENGTH} caracteres.`
+  },
+  { isValid: (v) => !/\s/.test(v), message: "La nueva contraseña no puede contener espacios." },
+  {
+    isValid: (v) => /[a-z]/.test(v),
+    message: "La nueva contraseña debe incluir al menos una letra minúscula."
+  },
+  {
+    isValid: (v) => /[A-Z]/.test(v),
+    message: "La nueva contraseña debe incluir al menos una letra mayúscula."
+  },
+  { isValid: (v) => /\d/.test(v), message: "La nueva contraseña debe incluir al menos un número." },
+  {
+    isValid: (v) => SPECIAL_CHAR_REGEX.test(v),
+    message: "La nueva contraseña debe incluir al menos un carácter especial."
+  }
+];
 
 @ValidatorConstraint({ name: "isValidNewPassword", async: false })
 export class IsValidNewPasswordConstraint implements ValidatorConstraintInterface {
   validate(value: unknown, args: ValidationArguments): boolean {
-    if (typeof value !== "string") {
-      return false;
-    }
+    if (typeof value !== "string") return false;
 
-    if (value.length < 8 || value.length > 12) {
-      return false;
-    }
+    const failsBaseRules = PASSWORD_RULES.some((rule) => !rule.isValid(value));
+    if (failsBaseRules) return false;
 
-    if (!STRONG_PASSWORD_REGEX.test(value)) {
-      return false;
-    }
-
-    const [currentPasswordField] = args.constraints as [string];
-    const object = args.object as Record<string, unknown>;
-    const currentPassword = object[currentPasswordField];
-
-    if (typeof currentPassword === "string" && value === currentPassword) {
-      return false;
-    }
-
-    return true;
+    return !this.matchesCurrentPassword(value, args);
   }
 
   defaultMessage(args: ValidationArguments): string {
@@ -41,43 +58,23 @@ export class IsValidNewPasswordConstraint implements ValidatorConstraintInterfac
       return "La nueva contraseña debe ser una cadena de texto.";
     }
 
-    if (value.length < 8) {
-      return "La nueva contraseña debe tener al menos 8 caracteres.";
-    }
+    // ✅ Una sola fuente de verdad — el primer rule que falle define el mensaje
+    const failedRule = PASSWORD_RULES.find((rule) => !rule.isValid(value));
+    if (failedRule) return failedRule.message;
 
-    if (value.length > 12) {
-      return "La nueva contraseña no puede exceder 12 caracteres.";
-    }
-
-    if (/\s/.test(value)) {
-      return "La nueva contraseña no puede contener espacios.";
-    }
-
-    if (!/[a-z]/.test(value)) {
-      return "La nueva contraseña debe incluir al menos una letra minúscula.";
-    }
-
-    if (!/[A-Z]/.test(value)) {
-      return "La nueva contraseña debe incluir al menos una letra mayúscula.";
-    }
-
-    if (!/\d/.test(value)) {
-      return "La nueva contraseña debe incluir al menos un número.";
-    }
-
-    if (!/[^\w\s]/.test(value)) {
-      return "La nueva contraseña debe incluir al menos un carácter especial.";
-    }
-
-    const [currentPasswordField] = args.constraints as [string];
-    const object = args.object as Record<string, unknown>;
-    const currentPassword = object[currentPasswordField];
-
-    if (typeof currentPassword === "string" && value === currentPassword) {
+    if (this.matchesCurrentPassword(value, args)) {
       return "La nueva contraseña debe ser diferente a la actual.";
     }
 
     return "La nueva contraseña no cumple las reglas de seguridad.";
+  }
+
+  private matchesCurrentPassword(value: string, args: ValidationArguments): boolean {
+    const [currentPasswordField] = args.constraints as [string];
+    const object = args.object as Record<string, unknown>;
+    const currentPassword = object[currentPasswordField];
+
+    return typeof currentPassword === "string" && value === currentPassword;
   }
 }
 

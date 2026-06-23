@@ -28,3 +28,9 @@ enum Priority {
   MEDIA
   ALTA
 }
+
+enum State {
+  NO_INICIADO
+  COMPLETADO
+  CANCELADO
+}

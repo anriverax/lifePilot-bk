@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { RoleType } from "@/prisma/generated/client";
 import { RedisService } from "@/services/redis/redis.service";
 import { UserRepository } from "@/api/auth/repositories/user.repository";
@@ -10,15 +10,18 @@ import {
   AuthorizationSnapshotOptions,
   FlatMenuItem
 } from "../domain/auth.entity";
+import { ErrorHandlingService } from "@/services/errorHandling/error-handling.service";
 
 @Injectable()
 export class AuthorizationService {
   private static readonly CACHE_TTL_SECONDS = 300;
-
+  private static readonly CACHE_INVALIDATION_BATCH_SIZE = 500;
+  private readonly logger = new Logger(AuthorizationService.name);
   constructor(
     private readonly userRepository: UserRepository,
     private readonly rolePermissionRepository: RolPermissionRepository,
-    private readonly redis: RedisService
+    private readonly redis: RedisService,
+    private readonly errorHandlingService: ErrorHandlingService
   ) {}
 
   async getAuthorizationSnapshot(
@@ -29,12 +32,16 @@ export class AuthorizationService {
     const forceRefresh = options?.forceRefresh ?? false;
 
     if (!forceRefresh) {
-      const cachedPayload = await this.redis.get<AuthorizationCachePayload>(
-        this.getAuthorizationCacheKey(parsedUserId)
-      );
-
-      if (cachedPayload) {
-        return this.toAuthorizationSnapshot(cachedPayload);
+      try {
+        const cachedPayload = await this.redis.get<AuthorizationCachePayload>(
+          this.getAuthorizationCacheKey(parsedUserId)
+        );
+        if (cachedPayload) return this.toAuthorizationSnapshot(cachedPayload);
+      } catch (error) {
+        this.logger.warn(
+          `Redis no disponible, leyendo directo de DB: ${this.errorHandlingService.handleBetterAuthError("AuthHandler.execute", error)}`
+        );
+        // No relanzar — continúa al fetch fresco
       }
     }
 
@@ -74,11 +81,14 @@ export class AuthorizationService {
   async invalidateAuthorizationByRoleId(roleId: number): Promise<void> {
     const users = await this.userRepository.getAllUserIdByRoleId(roleId);
 
-    if (users.length === 0) {
-      return;
-    }
+    if (users.length === 0) return;
 
-    await Promise.all(users.map((user) => this.redis.del(this.getAuthorizationCacheKey(user.id))));
+    const keys = users.map((user) => this.getAuthorizationCacheKey(user.id));
+
+    for (let i = 0; i < keys.length; i += AuthorizationService.CACHE_INVALIDATION_BATCH_SIZE) {
+      const batch = keys.slice(i, i + AuthorizationService.CACHE_INVALIDATION_BATCH_SIZE);
+      await Promise.all(batch.map((key) => this.redis.del(key)));
+    }
   }
 
   private parseUserId(userId: number | string): number {

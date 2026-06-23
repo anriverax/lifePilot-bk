@@ -10,7 +10,7 @@ export enum Gender {
 export interface CreateUserInput {
   firstName: string;
   lastName: string;
-  address: string;
+  countryCode: string;
   gender: Gender;
   phoneNumber: string;
   birthdate: Date;

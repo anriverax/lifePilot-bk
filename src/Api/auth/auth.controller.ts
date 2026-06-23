@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Request, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Post, Get, Request } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { CommandBus } from "@nestjs/cqrs";
 import { Request as ExpressRequest } from "express";
@@ -8,7 +8,6 @@ import { VerifyEmailDto } from "./application/verify-email.dto";
 import { VerifyEmailCommand } from "./application/commands/verify-email/verify-email.command";
 import { CreateUserCommand } from "./application/commands/create-user/create-user.command";
 import { AuthDto } from "./application/auth.dto";
-import { DecryptBodyInterceptor } from "@/common/interceptors/decrypt-body.interceptor";
 import { AuthCommand } from "./application/commands/auth/auth.command";
 import { ChangePasswordCommand } from "./application/commands/change-password/change-password.command";
 import { ChangePasswordDto } from "./application/change-password.dto";
@@ -30,6 +29,7 @@ export class AuthController {
     private readonly authorizationService: AuthorizationService
   ) {}
   @AllowAnonymous()
+  @Throttle({ default: { limit: 5, ttl: 600000 } })
   @Post("register")
   async register(@Body() data: UserDto): Promise<NestResponse<boolean>> {
     const registerResult = await this.commandBus.execute(new CreateUserCommand(data));
@@ -42,7 +42,6 @@ export class AuthController {
 
   @AllowAnonymous()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @UseInterceptors(DecryptBodyInterceptor)
   @Post("login")
   async login(@Body() data: AuthDto): Promise<NestResponse<AuthResponse>> {
     const authResponse = await this.commandBus.execute(new AuthCommand(data));
@@ -101,7 +100,6 @@ export class AuthController {
     };
   }
 
-  @UseInterceptors(DecryptBodyInterceptor)
   @Post("change-password")
   async changePassword(
     @Request() req: ExpressRequest,

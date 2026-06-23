@@ -1,10 +1,11 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { VerifyEmailCommand } from "./verify-email.command";
-import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { auth } from "@/lib/auth";
+import { ErrorHandlingService } from "@/services/errorHandling/error-handling.service";
 
 @CommandHandler(VerifyEmailCommand)
 export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
+  constructor(private readonly errorHandlingService: ErrorHandlingService) {}
   async execute(command: VerifyEmailCommand): Promise<boolean> {
     const { data } = command;
     const { email, otp } = data;
@@ -17,28 +18,11 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
         }
       });
 
-      console.log("Email verification response:", res);
+      this.errorHandlingService.requireTrue(res.status, "No se pudo verificar el correo");
 
-      if (res.status) {
-        return true;
-      }
-
-      throw new InternalServerErrorException("No se pudo verificar el correo");
-    } catch (error) {
-      const msg = String((error as any)?.message ?? "").toLowerCase();
-
-      if (msg.includes("invalid otp") || msg.includes("invalid code")) {
-        throw new BadRequestException("El código OTP es inválido");
-      }
-
-      if (msg.includes("expired")) {
-        throw new BadRequestException("El código OTP ha expirado");
-      }
-
-      // Si ya es una excepción HTTP de Nest, relanzar
-      if ((error as any)?.status && (error as any)?.response) throw error;
-
-      throw new InternalServerErrorException("No se pudo verificar el correo");
+      return true;
+    } catch (error: unknown) {
+      this.errorHandlingService.handleBetterAuthError("VerifyEmailHandler.execute", error);
     }
   }
 }

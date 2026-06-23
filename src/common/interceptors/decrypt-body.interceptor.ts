@@ -3,6 +3,7 @@ import {
   CallHandler,
   ExecutionContext,
   Injectable,
+  Logger,
   NestInterceptor
 } from "@nestjs/common";
 import { Request } from "express";
@@ -11,6 +12,7 @@ import { decryptTextTransformer } from "../helpers/functions";
 
 @Injectable()
 export class DecryptBodyInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(DecryptBodyInterceptor.name);
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const body = request.body as Record<string, unknown> | undefined;
@@ -26,7 +28,10 @@ export class DecryptBodyInterceptor implements NestInterceptor {
         }
 
         request.body = decrypted;
-      } catch {
+      } catch (error) {
+        this.logger.warn(
+          `Fallo al descifrar body: ${error instanceof Error ? error.message : String(error)}`
+        );
         throw new BadRequestException("Error al descifrar el cuerpo de la solicitud.");
       }
     }
