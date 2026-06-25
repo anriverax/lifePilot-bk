@@ -1,7 +1,6 @@
 import { PrismaService } from "@/services/prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
-import { CreateEventInput } from "../domain/event.entity";
-import { PaginatedQueryParams } from "@/common/types";
+import { CreateEventInput, EventEntity } from "../domain/event.entity";
 
 @Injectable()
 export class EventRepository {
@@ -17,16 +16,26 @@ export class EventRepository {
     return event;
   }
 
-  async findAll(filters?: PaginatedQueryParams): Promise<any> {
-    const page = filters?.page ?? 1;
-    const limit = filters?.limit ?? 20;
-    const skip = (page - 1) * limit;
-
-    const [items, total] = await Promise.all([
-      this.prisma.event.findMany({ skip, take: limit, orderBy: { id: "desc" } }),
-      this.prisma.event.count()
-    ]);
-
-    return { items, total, page, limit };
+  async findByDateRange(startDate: Date, endDate: Date, userId: number): Promise<EventEntity[]> {
+    return this.prisma.event.findMany({
+      where: {
+        eventDateAndTime: { gte: startDate, lte: endDate },
+        createdBy: userId
+      },
+      select: {
+        id: true,
+        title: true,
+        eventDateAndTime: true,
+        isReminder: true,
+        eventType: true,
+        priority: true,
+        locationName: true,
+        locationAddress: true,
+        locationLat: true,
+        locationLng: true,
+        state: true
+      },
+      orderBy: { eventDateAndTime: "asc" }
+    });
   }
 }

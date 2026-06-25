@@ -1,4 +1,13 @@
-import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import {
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateIf
+} from "class-validator";
 import { Transform } from "class-transformer";
 import { EventType, Priority, State } from "@/prisma/generated/enums";
 
@@ -43,4 +52,14 @@ export class EventDto {
   @IsOptional()
   @IsEnum(State, { message: "El estado del evento no es válido." })
   state: State = State.NO_INICIADO;
+}
+
+export class GetCalendarEventsDto {
+  @ValidateIf((dto) => !dto.month && !dto.year)
+  @IsDateString({}, { message: "startDate debe ser una fecha ISO válida (o use month/year)" })
+  startDate?: string;
+
+  @ValidateIf((dto) => !dto.month && !dto.year)
+  @IsDateString({}, { message: "endDate debe ser una fecha ISO válida (o use month/year)" })
+  endDate?: string;
 }

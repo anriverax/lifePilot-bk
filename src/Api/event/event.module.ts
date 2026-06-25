@@ -4,12 +4,14 @@ import { ErrorHandlingModule } from "@/services/errorHandling/errorHandling.modu
 import { EventController } from "./event.controller";
 import { CreateEventHandler } from "./application/commands/create-event.handler";
 import { EventRepository } from "./repositories/event.repository";
+import { GetCalendarEventsHandler } from "./application/queries/get-calendar-events.handler";
 
-const EventCommand = [CreateEventHandler];
+const EventCommandHandlers = [CreateEventHandler];
+const EventQueryHandlers = [GetCalendarEventsHandler];
 
 @Module({
   imports: [CqrsModule, ErrorHandlingModule],
   controllers: [EventController],
-  providers: [EventRepository, ...EventCommand]
+  providers: [EventRepository, ...EventCommandHandlers, ...EventQueryHandlers]
 })
 export class EventModule {}
