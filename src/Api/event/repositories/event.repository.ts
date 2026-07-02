@@ -1,13 +1,14 @@
 import { PrismaService } from "@/services/prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
 import { CreateEventInput, EventEntity } from "../domain/event.entity";
+import { State } from "@/prisma/generated/enums";
 
 @Injectable()
 export class EventRepository {
   constructor(private readonly prisma: PrismaService) {}
   async createEvent(data: CreateEventInput): Promise<{ id: number }> {
     const event = await this.prisma.event.create({
-      data,
+      data: { ...data, state: State.NO_INICIADO },
       select: {
         id: true
       }

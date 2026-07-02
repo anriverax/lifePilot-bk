@@ -19,7 +19,6 @@ export class EventController {
     @Body() data: EventDto,
     @Session() session: UserSession
   ): Promise<NestResponse<{ id: number }>> {
-    // Aquí puedes ejecutar un comando para crear un evento
     const result = await this.commandBus.execute(
       new CreateEventCommand({ ...data, createdBy: parseInt(session.user.id) })
     );
@@ -36,7 +35,12 @@ export class EventController {
     @Session() session: UserSession
   ): Promise<NestResponse<EventEntity[]>> {
     const result = await this.queryBus.execute(
-      new GetCalendarEventsQuery(parseInt(session.user.id), filters.startDate, filters.endDate)
+      new GetCalendarEventsQuery(
+        parseInt(session.user.id),
+        filters.currentDate,
+        filters.month,
+        filters.year
+      )
     );
 
     return {

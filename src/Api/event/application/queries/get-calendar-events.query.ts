@@ -4,8 +4,9 @@ import { EventEntity } from "../../domain/event.entity";
 export class GetCalendarEventsQuery extends Query<EventEntity[]> {
   constructor(
     public readonly userId: number,
-    public readonly startDate?: string,
-    public readonly endDate?: string
+    public readonly currentDate?: string,
+    public readonly month?: number,
+    public readonly year?: number
   ) {
     super();
   }

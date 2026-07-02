@@ -5,11 +5,16 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsInt,
+  Min,
+  Max,
   IsString,
   ValidateIf
 } from "class-validator";
-import { Transform } from "class-transformer";
+
+import { Transform, Type } from "class-transformer";
 import { EventType, Priority, State } from "@/prisma/generated/enums";
+import { IsNotPastDate } from "@/common/validators/is-not-past-date.validator";
 
 export class EventDto {
   @IsNotEmpty({ message: "El nombre del evento es obligatorio." })
@@ -17,8 +22,9 @@ export class EventDto {
   @IsString({ message: "El nombre del evento debe ser una cadena de texto." })
   title: string = "";
 
-  @IsNotEmpty({ message: "La fecha y hora del evento es obligatorias." })
-  @Transform(({ value }) => new Date(value))
+  @IsNotEmpty({ message: "La fecha y hora del evento es obligatoria." })
+  @Transform(({ value }) => (value ? new Date(value) : value))
+  @IsNotPastDate()
   eventDateAndTime: Date = new Date();
 
   @IsOptional()
@@ -56,10 +62,21 @@ export class EventDto {
 
 export class GetCalendarEventsDto {
   @ValidateIf((dto) => !dto.month && !dto.year)
-  @IsDateString({}, { message: "startDate debe ser una fecha ISO válida (o use month/year)" })
-  startDate?: string;
+  @IsDateString({}, { message: "currentDate debe ser una fecha ISO válida (o use month/year)" })
+  currentDate?: string;
 
-  @ValidateIf((dto) => !dto.month && !dto.year)
-  @IsDateString({}, { message: "endDate debe ser una fecha ISO válida (o use month/year)" })
-  endDate?: string;
+  // ── Modo 2: mes + año ──
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  month?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(2000)
+  @Max(2100)
+  year?: number;
 }
